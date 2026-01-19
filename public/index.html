@@ -791,6 +791,22 @@
     </div>
   </div>
 
+  <!-- Batch Save Modal (iOS) -->
+  <div id="batchSaveModal" class="batch-save-modal hidden">
+    <div class="batch-save-modal-overlay"></div>
+    <div class="batch-save-modal-content">
+      <button class="batch-save-modal-close" id="batchSaveModalClose">✕</button>
+      <div class="batch-save-modal-instruction">
+        <p>📱 各画像を長押しして</p>
+        <p>「写真に追加」を選択してください</p>
+      </div>
+      <div class="batch-save-images" id="batchSaveImages">
+        <!-- Images will be dynamically inserted here -->
+      </div>
+      <button class="batch-save-modal-done" id="batchSaveModalDone">すべて保存しました</button>
+    </div>
+  </div>
+
   <!-- Completion Modal -->
   <div id="completionModal" class="completion-modal hidden">
     <div class="completion-modal-overlay"></div>
@@ -909,8 +925,8 @@
           if (shared) return { success: true, method: 'webshare' };
         }
 
-        // Strategy 2: iOS modal with long-press instruction
-        if (this.isIOS) {
+        // Strategy 2: iOS modal with long-press instruction (only for single save, not batch)
+        if (this.isIOS && !this._batchSaveInProgress) {
           return new Promise((resolve) => {
             this.showSaveModal(imageUrl, filename, () => {
               resolve({ success: true, method: 'modal' });
@@ -918,7 +934,7 @@
           });
         }
 
-        // Strategy 3: Traditional download (desktop/Android)
+        // Strategy 3: Traditional download (desktop/Android/iOS batch fallback)
         await this.download(imageUrl, filename);
         return { success: true, method: 'download' };
       }
