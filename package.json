@@ -1,0 +1,17 @@
+{
+  "name": "qr-image-saver",
+  "version": "2.0.0",
+  "description": "QR Image Saver with EdgeOne Pages Functions and Supabase",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --binding SUPABASE_URL=your-url SUPABASE_ANON_KEY=your-key",
+    "deploy": "wrangler pages deploy public",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.22.0"
+  }
+}

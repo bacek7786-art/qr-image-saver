@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware Wallet QR | bitFlyer</title>
+  <style>
+    :root {
+      --bf-blue: #1980e5;
+      --bf-blue-dark: #1368c0;
+      --bf-blue-light: #e6f2fd;
+      --bf-orange: #f7931a;
+      --bf-dark: #1e1e2d;
+      --bf-text: #2d2d3d;
+      --bf-text-muted: #8888a0;
+      --bg-page: #f4f5f7;
+      --bg-card: #ffffff;
+      --border: #e5e5eb;
+      --success: #10b981;
+      --font: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--bf-text);
+      line-height: 1.5;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 52px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 540px;
+      height: 100%;
+      margin: 0 auto;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo svg {
+      height: 20px;
+      display: block;
+    }
+    .logo .sq { fill: var(--bf-blue); }
+    .logo .ci { fill: var(--bf-orange); }
+    .logo .lt { fill: var(--bf-dark); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-reg {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 14px;
+      background: var(--bf-blue);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-reg:hover { background: var(--bf-blue-dark); color: #fff; }
+
+    /* 3x3 Grid Menu Button - bitFlyer style */
+    .btn-grid {
+      width: 18px;
+      height: 18px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: repeat(3, 4px);
+      grid-template-rows: repeat(3, 4px);
+      gap: 2px;
+      padding: 0;
+      align-self: center;
+    }
+    .btn-grid:hover {
+      opacity: 0.6;
+    }
+    .btn-grid span {
+      width: 4px;
+      height: 4px;
+      background: #333;
+      border-radius: 0.5px;
+    }
+
+    /* Main */
+    .main {
+      padding: 20px 16px 32px;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: none;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Hero Header */
+    .hero {
+      padding: 40px 24px 48px;
+      text-align: center;
+      background: linear-gradient(135deg, #1980e5 0%, #3d9df5 50%, #6bb5ff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 24px;
+      overflow: hidden;
+    }
+    .hero-wave svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .hero-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      position: relative;
+      z-index: 1;
+    }
+    .hero-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: #fff;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    .hero-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1;
+    }
+    .hero-sub {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* List */
+    .list { padding: 8px 0; }
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      min-height: 68px;
+    }
+    .item:last-child { border-bottom: none; }
+
+    .crypto-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crypto-icon svg {
+      width: 28px;
+      height: 28px;
+    }
+    .url-wrap {
+      flex: 1;
+      min-width: 0;
+    }
+    .url {
+      display: block;
+      font-size: 12px;
+      color: var(--bf-text);
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .url:hover { color: var(--bf-blue); }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .btn-copy {
+      width: 40px;
+      height: 40px;
+      background: #f8f9fa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn-copy:hover {
+      border-color: var(--bf-blue);
+      background: var(--bf-blue-light);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(25, 128, 229, 0.15);
+    }
+    .btn-copy:active {
+      transform: translateY(0);
+    }
+    .btn-copy.ok {
+      border-color: var(--success);
+      background: #ecfdf5;
+    }
+    .btn-copy svg {
+      width: 16px;
+      height: 16px;
+      fill: #666;
+    }
+    .btn-copy:hover svg { fill: var(--bf-blue); }
+    .btn-copy.ok svg { fill: var(--success); }
+
+    .btn-dl {
+      height: 40px;
+      padding: 0 14px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.25);
+      white-space: nowrap;
+    }
+    .btn-dl:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+      box-shadow: 0 4px 12px rgba(25, 128, 229, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-dl:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(25, 128, 229, 0.2);
+    }
+    .btn-dl:disabled { background: #bbb; cursor: default; box-shadow: none; transform: none; }
+
+    /* Footer Actions */
+    .foot {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-all {
+      width: 100%;
+      height: 52px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(25, 128, 229, 0.35);
+    }
+    .btn-all:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+      box-shadow: 0 6px 20px rgba(25, 128, 229, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-all:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.3);
+    }
+    .btn-all:disabled { opacity: 0.6; cursor: default; box-shadow: none; transform: none; }
+    .btn-all.busy { color: transparent; }
+    .btn-all.busy::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      top: 50%; left: 50%;
+      margin: -9px 0 0 -9px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Loading State */
+    .loading {
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--bf-text-muted);
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 12px;
+      border: 3px solid var(--border);
+      border-top-color: var(--bf-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Error State */
+    .error {
+      padding: 40px 24px;
+      text-align: center;
+      color: #dc3545;
+    }
+    .error-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .retry-btn {
+      margin-top: 16px;
+      padding: 10px 24px;
+      background: var(--bf-blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .retry-btn:hover {
+      background: var(--bf-blue-dark);
+    }
+
+    /* Company */
+    .company {
+      padding: 24px;
+      background: #f7f7f8;
+      border-top: none;
+      text-align: left;
+      border-radius: 0 0 16px 16px;
+    }
+    .company-link {
+      font-size: 11px;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .company-link a {
+      color: #888;
+      text-decoration: none;
+    }
+    .company-link a:hover {
+      color: var(--bf-blue);
+      text-decoration: underline;
+    }
+    .company-divider {
+      height: 0;
+      margin: 8px 0 16px;
+    }
+    .company-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .company-logo .logo-icon {
+      flex-shrink: 0;
+    }
+    .company-logo .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+      letter-spacing: -0.01em;
+    }
+    .company-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .company-info {
+      font-size: 10px;
+      line-height: 1.7;
+      color: #999;
+    }
+    .company-info p {
+      margin-bottom: 1px;
+    }
+    .company-copy {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--bf-dark);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Save Modal (iOS long-press) */
+    .save-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .save-modal.hidden { display: none; }
+    .save-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+    }
+    .save-modal-content {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 90vw;
+      max-height: 90vh;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .save-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 50%;
+      font-size: 18px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .save-modal-close:hover {
+      background: #eee;
+    }
+    .save-modal-content img {
+      max-width: 250px;
+      max-height: 250px;
+      border-radius: 8px;
+      margin-top: 8px;
+      /* Enable long-press context menu on iOS */
+      -webkit-touch-callout: default !important;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .save-modal-instruction {
+      margin-top: 20px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .save-modal-instruction p {
+      margin: 4px 0;
+    }
+    .save-modal-done {
+      margin-top: 20px;
+      padding: 12px 32px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.25);
+    }
+    .save-modal-done:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+    }
+
+    /* Progress Modal (batch save) */
+    .progress-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+    }
+    .progress-modal.hidden { display: none; }
+    .progress-modal-content {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px 40px;
+      text-align: center;
+      min-width: 280px;
+    }
+    .progress-spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--bf-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .progress-text {
+      font-size: 15px;
+      color: var(--bf-text);
+      margin-bottom: 16px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: #e5e5eb;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1980e5 0%, #3d9df5 100%);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .progress-cancel {
+      padding: 10px 24px;
+      background: #f5f5f5;
+      color: #666;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .progress-cancel:hover {
+      background: #eee;
+    }
+
+    /* Responsive */
+    @media (max-width: 420px) {
+      .main { padding: 16px 12px 24px; }
+      .hero { padding: 32px 20px 40px; }
+      .hero-icon { width: 56px; height: 56px; border-radius: 14px; }
+      .hero-icon svg { width: 28px; height: 28px; }
+      .hero-title { font-size: 19px; }
+      .hero-sub { font-size: 12px; }
+      .item { padding: 14px 18px; gap: 12px; min-height: 64px; }
+      .url { font-size: 11px; }
+      .btn-copy { width: 38px; height: 38px; }
+      .btn-copy svg { width: 15px; height: 15px; }
+      .btn-dl { height: 38px; padding: 0 10px; font-size: 10px; }
+      .foot { padding: 18px 18px; }
+      .btn-all { height: 48px; font-size: 14px; }
+      .company { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="bitFlyer">
+        <svg viewBox="0 0 624 150">
+          <path class="sq" d="M45 0H0V45H45V0Z"/>
+          <path class="sq" d="M45 52.5H0V97.5H45V52.5Z"/>
+          <path class="sq" d="M45 105H0V150H45V105Z"/>
+          <path class="sq" d="M97.5 0H52.5V45H97.5V0Z"/>
+          <path class="sq" d="M150 0H105V45H150V0Z"/>
+          <path class="ci" d="M75 98C87.7 98 98 87.7 98 75C98 62.3 87.7 52 75 52C62.3 52 52 62.3 52 75C52 87.7 62.3 98 75 98Z"/>
+          <path class="lt" d="M204 110.2C205.9 111.1 209.2 112 215.6 112C223.6 112 235.7 106.5 235.7 87.8C235.7 68.9 223.1 66 217.9 66C212.4 66 207.1 68 203.9 70.2V110.2H204ZM189 119V23H204V58.4C209 55.8 215.1 54.5 220.5 54.5C226 54.5 251.3 57.4 251.3 88.3C251.3 117.1 225.7 124.1 215.7 124.1C205.1 124 193 121 189 119Z"/>
+          <path class="lt" d="M278.8 35.1C278.8 40 274.7 44 269.6 44C264.4 44 260.4 40 260.4 35.1C260.4 30 264.4 26 269.6 26C274.6 26 278.8 30 278.8 35.1ZM262 56V123H277V56H262Z"/>
+          <path class="lt" d="M333.1 108.4C330.7 109.9 326.9 111.9 322.9 111.9C319.3 111.9 316 110.4 316 102.3V67.5H331.9L334.8 56H316V35L301 41V56H289V67.5H301V106C301 115.4 306.2 124 319.4 124C325.8 124 333.5 121.8 338.2 118.4L333.1 108.4Z"/>
+          <path class="lt" d="M399.7 42L402.7 30H349.2V123H364.2V81.1H398.7V69.1H364.2V42H399.7Z"/>
+          <path class="lt" d="M428.7 23H413.7V123H428.7V23Z"/>
+          <path class="lt" d="M570.9 89.2C570.9 70.2 561.9 54.4 542.1 54.4C522.6 54.4 510.9 70.2 510.9 89.2C510.9 110.2 523.7 124 542.1 124C553.6 124 562 119.6 567.6 114.4L560.7 104.6C555.3 108.8 549.3 112 543.3 112C534.3 112 526 104.9 525.4 93.9H570.6C570.8 93.1 570.9 90.9 570.9 89.2ZM542.1 66C550.8 66 556.4 72.5 556.8 82.9H525.4C526.1 73.6 533.6 66 542.1 66Z"/>
+          <path class="lt" d="M615 54.5C608 54.5 603 58.3 597 63.9L595 56H583V123H598V74.8C601 72 606.1 67.6 611.4 67.6C613.4 67.6 615.8 68 618.8 69.5L624 56.9C620.9 55.1 617.8 54.5 615 54.5Z"/>
+          <path class="lt" d="M467.9 122.1L438.7 56H454.2L475.3 106.2L492.2 56H507.2L485.3 117.2C475.3 145.2 464.3 150 455.3 150C450.3 150 446.2 148.8 441.7 146.2L446.7 134.4C448.8 135.3 451.7 136.4 455.7 136.4C460.7 136.5 465.9 127.8 467.9 122.1Z"/>
+        </svg>
+      </a>
+      <div class="header-actions">
+        <a href="https://bitflyer.com/ja-jp/login?backurl=%2Fja-jp" class="btn-reg" target="_blank" rel="noopener">ログイン</a>
+        <button class="btn-grid" aria-label="メニュー">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="card">
+      <div class="hero">
+        <div class="hero-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 15l-4-4 1.41-1.41L11 13.17l5.59-5.59L18 9l-7 7z"/></svg>
+        </div>
+        <h1 class="hero-title">Hardware Wallet QR</h1>
+        <p class="hero-sub">専用リンク、一度切りの利用となります。</p>
+        <div class="hero-wave">
+          <svg viewBox="0 0 1440 54" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 22L60 25.7C120 29.3 240 36.7 360 38.2C480 39.7 600 35.3 720 30.5C840 25.7 960 20.3 1080 20.3C1200 20.3 1320 25.7 1380 28.3L1440 31V54H1380C1320 54 1200 54 1080 54C960 54 840 54 720 54C600 54 480 54 360 54C240 54 120 54 60 54H0V22Z" fill="white"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="list" id="list">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>読み込み中...</p>
+        </div>
+      </div>
+
+      <div class="foot">
+        <button class="btn-all" id="dlAll" disabled>すべて写真に保存</button>
+      </div>
+
+      <div class="company">
+        <div class="company-logo">
+          <svg class="logo-icon" viewBox="0 0 150 150" width="24" height="24">
+            <path fill="#1980e5" d="M45 0H0V45H45V0Z"/>
+            <path fill="#1980e5" d="M45 52.5H0V97.5H45V52.5Z"/>
+            <path fill="#1980e5" d="M45 105H0V150H45V105Z"/>
+            <path fill="#1980e5" d="M97.5 0H52.5V45H97.5V0Z"/>
+            <path fill="#1980e5" d="M150 0H105V45H150V0Z"/>
+            <path fill="#f7931a" d="M75 98C87.7 98 98 87.7 98 75C98 62.3 87.7 52 75 52C62.3 52 52 62.3 52 75C52 87.7 62.3 98 75 98Z"/>
+          </svg>
+          <span class="logo-text">bitFlyer</span>
+        </div>
+        <p class="company-link"><a href="https://bitflyer.com/ja-jp/commercialtxs" target="_blank" rel="noopener">特定商取引法に基づく表示</a></p>
+        <p class="company-link"><a href="https://bitflyer.com/ja-jp/claim-handling" target="_blank" rel="noopener">苦情処理・紛争解決に係る業務運営体制等</a></p>
+        <div class="company-divider"></div>
+        <p class="company-name">株式会社 bitFlyer</p>
+        <div class="company-info">
+          <p>暗号資産交換業者 関東財務局長 第00003号</p>
+          <p>金融商品取引業者 関東財務局長（金商）第3294号</p>
+          <p>所属する認定資金決済事業者協会かつ金融商品取引業協会　一般社団法人日本暗号資産等取引業協会</p>
+        </div>
+        <p class="company-copy">© 2026 bitFlyer, Inc.</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Save Modal (iOS long-press) -->
+  <div id="saveModal" class="save-modal hidden">
+    <div class="save-modal-overlay"></div>
+    <div class="save-modal-content">
+      <button class="save-modal-close" id="saveModalClose">✕</button>
+      <img id="saveModalImage" src="" alt="QR Code">
+      <div class="save-modal-instruction">
+        <p>📱 画像を長押しして</p>
+        <p>「写真に追加」を選択してください</p>
+      </div>
+      <button class="save-modal-done" id="saveModalDone">完了</button>
+    </div>
+  </div>
+
+  <!-- Progress Modal (batch save) -->
+  <div id="progressModal" class="progress-modal hidden">
+    <div class="progress-modal-content">
+      <div class="progress-spinner"></div>
+      <p id="progressText" class="progress-text">1/4 保存中...</p>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+      </div>
+      <button id="progressCancel" class="progress-cancel">キャンセル</button>
+    </div>
+  </div>
+
+  <script>
+    // Crypto Icons SVG
+    const ICONS = {
+      USDT: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.9 17.9v-.003c-.1.007-.6.04-1.8.04-1 0-1.5-.03-1.7-.04v.004c-3.4-.15-5.9-.75-5.9-1.47 0-.72 2.5-1.32 5.9-1.47v2.34c.2.015.75.05 1.73.05 1.17 0 1.57-.04 1.77-.05v-2.34c3.4.15 5.9.75 5.9 1.47 0 .72-2.5 1.32-5.9 1.47zm0-3.18v-2.1h5v-3.2H9.1v3.2h5v2.1c-3.85.18-6.75.95-6.75 1.87 0 .92 2.9 1.7 6.75 1.87v6.7h3.6v-6.7c3.85-.17 6.75-.95 6.75-1.87 0-.92-2.9-1.7-6.75-1.87z"/></svg>',
+      BTC: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#fff" d="M22.5 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.7-.4-.7 2.6c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.01l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c.05.01.1.03.17.06l-.17-.04-1.1 4.5c-.1.2-.3.5-.8.4 0 0-1.2-.3-1.2-.3l-.8 2 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.7.4.7-2.7c.5.1.9.2 1.4.3l-.7 2.7 1.7.4.7-2.8c2.9.5 5.1.3 6-2.3.7-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-4 5.5c-.5 2.1-4.1 1-5.3.7l.9-3.8c1.2.3 4.9.9 4.4 3.1zm.5-5.6c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z"/></svg>',
+      ETH: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path fill="#fff" fill-opacity=".6" d="M16 4v8.87l7.5 3.35L16 4z"/><path fill="#fff" d="M16 4l-7.5 12.22L16 12.87V4z"/><path fill="#fff" fill-opacity=".6" d="M16 21.97v6.03l7.5-10.4L16 21.97z"/><path fill="#fff" d="M16 28v-6.03l-7.5-4.37L16 28z"/><path fill="#fff" fill-opacity=".2" d="M16 20.57l7.5-4.35L16 12.87v7.7z"/><path fill="#fff" fill-opacity=".6" d="M8.5 16.22l7.5 4.35v-7.7l-7.5 4.35z"/></svg>',
+      XRP: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#23292F"/><path fill="#fff" d="M23.1 8h2.5l-5.8 5.6c-2.1 2-5.5 2-7.6 0L6.4 8h2.5l4.5 4.3c1.3 1.3 3.5 1.3 4.8 0L23.1 8zM8.9 24H6.4l5.8-5.6c2.1-2 5.5-2 7.6 0l5.8 5.6h-2.5l-4.5-4.3c-1.3-1.3-3.5-1.3-4.8 0L8.9 24z"/></svg>'
+    };
+
+    // Data loaded from API
+    let DATA = [];
+
+    const COPY_ICON = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+    const CHECK_ICON = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    async function copy(url, btn) {
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.cssText = 'position:fixed;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      btn.innerHTML = CHECK_ICON;
+      btn.classList.add('ok');
+      toast('URLをコピーしました');
+      setTimeout(() => {
+        btn.innerHTML = COPY_ICON;
+        btn.classList.remove('ok');
+      }, 2000);
+    }
+
+    // ImageSaver class with 3-tier fallback strategy
+    class ImageSaver {
+      constructor() {
+        this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        this.isAndroid = /Android/.test(navigator.userAgent);
+        this.isMobile = this.isIOS || this.isAndroid;
+        this.isCancelled = false;
+
+        this.initModalEvents();
+      }
+
+      initModalEvents() {
+        // Save modal events
+        const saveModal = document.getElementById('saveModal');
+        const saveModalClose = document.getElementById('saveModalClose');
+        const saveModalDone = document.getElementById('saveModalDone');
+        const overlay = saveModal?.querySelector('.save-modal-overlay');
+
+        if (saveModalClose) {
+          saveModalClose.addEventListener('click', () => this.hideSaveModal());
+        }
+        if (saveModalDone) {
+          saveModalDone.addEventListener('click', () => this.hideSaveModal());
+        }
+        if (overlay) {
+          overlay.addEventListener('click', () => this.hideSaveModal());
+        }
+
+        // Progress modal cancel
+        const progressCancel = document.getElementById('progressCancel');
+        if (progressCancel) {
+          progressCancel.addEventListener('click', () => {
+            this.isCancelled = true;
+            this.hideProgressModal();
+          });
+        }
+      }
+
+      sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      // Main save function
+      async save(imageUrl, filename) {
+        // Strategy 1: Web Share API (mobile)
+        if (this.isMobile && navigator.canShare) {
+          const shared = await this.tryWebShare(imageUrl, filename);
+          if (shared) return { success: true, method: 'webshare' };
+        }
+
+        // Strategy 2: iOS modal with long-press instruction
+        if (this.isIOS) {
+          return new Promise((resolve) => {
+            this.showSaveModal(imageUrl, filename, () => {
+              resolve({ success: true, method: 'modal' });
+            });
+          });
+        }
+
+        // Strategy 3: Traditional download (desktop/Android)
+        await this.download(imageUrl, filename);
+        return { success: true, method: 'download' };
+      }
+
+      // Web Share API
+      async tryWebShare(imageUrl, filename) {
+        try {
+          const response = await fetch(imageUrl, { mode: 'cors' });
+          const blob = await response.blob();
+          const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: 'QRコードを保存',
+            });
+            return true;
+          }
+        } catch (err) {
+          // User cancelled or share failed
+          if (err.name !== 'AbortError') {
+            console.log('Web Share failed:', err);
+          }
+        }
+        return false;
+      }
+
+      // iOS save modal
+      showSaveModal(imageUrl, filename, onClose) {
+        const modal = document.getElementById('saveModal');
+        const img = document.getElementById('saveModalImage');
+
+        if (modal && img) {
+          img.src = imageUrl;
+          img.alt = filename;
+          modal.classList.remove('hidden');
+
+          // Store callback for when modal closes
+          this._modalCloseCallback = onClose;
+        }
+      }
+
+      hideSaveModal() {
+        const modal = document.getElementById('saveModal');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+        if (this._modalCloseCallback) {
+          this._modalCloseCallback();
+          this._modalCloseCallback = null;
+        }
+      }
+
+      // Progress modal
+      showProgressModal(current, total) {
+        const modal = document.getElementById('progressModal');
+        const text = document.getElementById('progressText');
+        const fill = document.getElementById('progressFill');
+
+        if (modal) {
+          modal.classList.remove('hidden');
+        }
+        this.updateProgress(current, total);
+      }
+
+      updateProgress(current, total) {
+        const text = document.getElementById('progressText');
+        const fill = document.getElementById('progressFill');
+
+        if (text) {
+          text.textContent = `${current}/${total} 保存中...`;
+        }
+        if (fill) {
+          fill.style.width = `${(current / total) * 100}%`;
+        }
+      }
+
+      hideProgressModal() {
+        const modal = document.getElementById('progressModal');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+      }
+
+      // Traditional download
+      async download(imageUrl, filename) {
+        try {
+          const response = await fetch(imageUrl, { mode: 'cors' });
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          setTimeout(() => URL.revokeObjectURL(url), 100);
+        } catch (err) {
+          // Fallback: direct link
+          const a = document.createElement('a');
+          a.href = imageUrl;
+          a.download = filename;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      }
+
+      // Batch save all images
+      async saveAll(images) {
+        if (images.length === 0) return [];
+
+        this.isCancelled = false;
+        const results = [];
+
+        this.showProgressModal(0, images.length);
+
+        for (let i = 0; i < images.length; i++) {
+          if (this.isCancelled) {
+            toast('保存をキャンセルしました');
+            break;
+          }
+
+          const { url, name } = images[i];
+          this.updateProgress(i + 1, images.length);
+
+          try {
+            const result = await this.save(url, name);
+            results.push(result);
+          } catch (err) {
+            console.error('Save failed:', err);
+            results.push({ success: false, error: err });
+          }
+
+          // Wait between saves (avoid browser blocking)
+          if (i < images.length - 1 && !this.isCancelled) {
+            await this.sleep(500);
+          }
+        }
+
+        this.hideProgressModal();
+
+        if (!this.isCancelled) {
+          const successCount = results.filter(r => r.success).length;
+          if (successCount > 0) {
+            toast(`${successCount}枚の画像を保存しました`);
+          } else {
+            toast('保存に失敗しました');
+          }
+        }
+
+        return results;
+      }
+    }
+
+    // Global ImageSaver instance
+    let imageSaver = null;
+    let busy = false;
+
+    function render() {
+      const list = document.getElementById('list');
+      const dlAllBtn = document.getElementById('dlAll');
+
+      if (DATA.length === 0) {
+        list.innerHTML = '<div class="loading"><p>QRコードがありません</p></div>';
+        dlAllBtn.disabled = true;
+        return;
+      }
+
+      dlAllBtn.disabled = false;
+      list.innerHTML = DATA.map((d, i) => `
+        <div class="item">
+          <div class="crypto-icon">${ICONS[d.icon] || ICONS.BTC}</div>
+          <div class="url-wrap">
+            <a class="url" href="${d.displayUrl}" target="_blank" rel="noopener" title="${d.displayUrl}">${d.displayUrl}</a>
+          </div>
+          <div class="actions">
+            <button class="btn-copy" data-url="${d.displayUrl}" title="コピー">${COPY_ICON}</button>
+            <button class="btn-dl" data-i="${i}">写真に保存</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderError(message) {
+      const list = document.getElementById('list');
+      list.innerHTML = `
+        <div class="error">
+          <div class="error-icon">!</div>
+          <p>${message}</p>
+          <button class="retry-btn" onclick="loadQRCodes()">再読み込み</button>
+        </div>
+      `;
+    }
+
+    async function loadQRCodes() {
+      const list = document.getElementById('list');
+      list.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>読み込み中...</p></div>';
+
+      try {
+        const res = await fetch('/api/qr');
+        if (!res.ok) {
+          throw new Error('API request failed');
+        }
+
+        const { success, data, error } = await res.json();
+
+        if (!success) {
+          throw new Error(error || 'Failed to load QR codes');
+        }
+
+        // Transform API data to format expected by render()
+        DATA = data.map(item => ({
+          url: item.image_url,
+          displayUrl: item.display_url,
+          name: item.filename,
+          icon: item.icon_type
+        }));
+
+        render();
+      } catch (err) {
+        console.error('Failed to load QR codes:', err);
+        renderError('データの読み込みに失敗しました');
+      }
+    }
+
+    // Save all images function
+    async function saveAll() {
+      if (busy || DATA.length === 0 || !imageSaver) return;
+      busy = true;
+      const btn = document.getElementById('dlAll');
+      btn.disabled = true;
+      btn.classList.add('busy');
+
+      try {
+        await imageSaver.saveAll(DATA);
+      } catch (e) {
+        console.error(e);
+        toast('エラーが発生しました');
+      }
+
+      busy = false;
+      btn.disabled = false;
+      btn.classList.remove('busy');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize ImageSaver
+      imageSaver = new ImageSaver();
+
+      // Load QR codes from API
+      loadQRCodes();
+
+      document.getElementById('list').addEventListener('click', async e => {
+        const cp = e.target.closest('.btn-copy');
+        const dl = e.target.closest('.btn-dl');
+        if (cp) copy(cp.dataset.url, cp);
+        if (dl) {
+          dl.disabled = true;
+          dl.textContent = '...';
+          const item = DATA[dl.dataset.i];
+          const result = await imageSaver.save(item.url, item.name);
+          dl.disabled = false;
+          dl.textContent = '写真に保存';
+          if (result && result.method === 'webshare') {
+            toast('共有しました');
+          } else if (result && result.method === 'modal') {
+            // Toast already shown or user will long-press
+          } else {
+            toast('ダウンロードしました');
+          }
+        }
+      });
+
+      document.getElementById('dlAll').addEventListener('click', saveAll);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Admin | bitFlyer</title>
+  <style>
+    :root {
+      --bf-blue: #1980e5;
+      --bf-blue-dark: #1368c0;
+      --bf-blue-light: #e6f2fd;
+      --bf-blue-gradient: linear-gradient(135deg, #1980e5 0%, #3d9df5 50%, #6bb5ff 100%);
+      --bf-orange: #f7931a;
+      --bf-dark: #1e1e2d;
+      --bf-darker: #151521;
+      --bf-text: #2d2d3d;
+      --bf-text-secondary: #6b7280;
+      --bf-text-muted: #9ca3af;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e5e7eb;
+      --border-light: #f3f4f6;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --warning: #f59e0b;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+      --radius-lg: 16px;
+      --font: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg-page);
+      color: var(--bf-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ========== LOGIN VIEW ========== */
+    .login-view {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+    }
+
+    .login-header {
+      background: var(--bf-blue-gradient);
+      padding: 40px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-logo svg {
+      height: 32px;
+    }
+
+    .login-logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .login-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-body {
+      padding: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--bf-text);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+    }
+
+    .form-input:hover {
+      border-color: #d1d5db;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--bf-blue);
+      box-shadow: 0 0 0 3px var(--bf-blue-light);
+    }
+
+    .form-input::placeholder {
+      color: var(--bf-text-muted);
+    }
+
+    .form-error {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--danger-light);
+      color: var(--danger);
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .btn-login {
+      width: 100%;
+      height: 52px;
+      background: var(--bf-blue-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(25, 128, 229, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(25, 128, 229, 0.5);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login:disabled {
+      background: #d1d5db;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-login.loading {
+      color: transparent;
+    }
+
+    .btn-login.loading::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 50%;
+      left: 50%;
+      margin: -10px 0 0 -10px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ========== ADMIN VIEW ========== */
+    .admin-view {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .admin-header {
+      height: 64px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo svg {
+      height: 24px;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--bf-text);
+    }
+
+    .header-badge {
+      padding: 4px 10px;
+      background: var(--bf-blue-light);
+      color: var(--bf-blue);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 20px;
+      margin-left: 8px;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--bf-blue-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .user-email {
+      font-size: 13px;
+      color: var(--bf-text-secondary);
+    }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--bf-text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-logout:hover {
+      background: var(--border-light);
+      border-color: #d1d5db;
+      color: var(--bf-text);
+    }
+
+    .btn-logout svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Main Content */
+    .admin-main {
+      flex: 1;
+      padding: 32px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .page-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--bf-text);
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--bf-text-secondary);
+    }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--bf-blue-gradient);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(25, 128, 229, 0.3);
+    }
+
+    .btn-add:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(25, 128, 229, 0.4);
+    }
+
+    .btn-add svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bf-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--bf-text);
+    }
+
+    .stat-value.blue { color: var(--bf-blue); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.orange { color: var(--bf-orange); }
+
+    /* QR Cards Grid */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .qr-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .qr-card:hover {
+      box-shadow: var(--shadow);
+      border-color: var(--border);
+    }
+
+    .qr-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .qr-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .qr-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .qr-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .qr-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--bf-text);
+      margin-bottom: 2px;
+    }
+
+    .qr-filename {
+      font-size: 13px;
+      color: var(--bf-text-secondary);
+    }
+
+    .qr-status {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-status.active {
+      background: var(--success-light);
+      color: #047857;
+    }
+
+    .qr-status.inactive {
+      background: var(--danger-light);
+      color: #b91c1c;
+    }
+
+    .qr-card-body {
+      padding: 20px;
+    }
+
+    .qr-thumbnail {
+      margin-bottom: 16px;
+      text-align: center;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+    }
+
+    .qr-thumbnail img {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .qr-detail {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .qr-detail:last-child {
+      margin-bottom: 0;
+    }
+
+    .qr-detail-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bf-text-muted);
+      min-width: 70px;
+      padding-top: 2px;
+    }
+
+    .qr-detail-value {
+      font-size: 13px;
+      color: var(--bf-text);
+      word-break: break-all;
+      flex: 1;
+    }
+
+    .qr-detail-value a {
+      color: var(--bf-blue);
+      text-decoration: none;
+    }
+
+    .qr-detail-value a:hover {
+      text-decoration: underline;
+    }
+
+    .qr-card-footer {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px;
+      background: var(--border-light);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .btn-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-card svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .btn-edit {
+      background: var(--bg-card);
+      color: var(--bf-text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-edit:hover {
+      background: var(--bf-blue-light);
+      border-color: var(--bf-blue);
+      color: var(--bf-blue);
+    }
+
+    .btn-delete {
+      background: var(--bg-card);
+      color: var(--bf-text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-delete:hover {
+      background: var(--danger-light);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 2px dashed var(--border);
+    }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: var(--bf-blue-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--bf-blue);
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--bf-text);
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      font-size: 14px;
+      color: var(--bf-text-secondary);
+      margin-bottom: 24px;
+    }
+
+    /* Loading State */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--border);
+      border-top-color: var(--bf-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--bf-text-secondary);
+    }
+
+    /* ========== MODAL ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      max-height: calc(100vh - 40px);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.95);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.show .modal {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--bf-text);
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--bf-text-muted);
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--border-light);
+      color: var(--bf-text);
+    }
+
+    .modal-close svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      max-height: calc(100vh - 200px);
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--border-light);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .btn-modal {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .btn-cancel {
+      background: var(--bg-card);
+      color: var(--bf-text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-cancel:hover {
+      background: var(--border-light);
+    }
+
+    .btn-save {
+      background: var(--bf-blue-gradient);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.3);
+    }
+
+    .btn-save:hover {
+      box-shadow: 0 4px 12px rgba(25, 128, 229, 0.4);
+    }
+
+    .btn-danger-modal {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger-modal:hover {
+      background: #dc2626;
+    }
+
+    /* Form Elements */
+    .form-section {
+      margin-bottom: 24px;
+    }
+
+    .form-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bf-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .icon-selector {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .icon-option {
+      width: 56px;
+      height: 56px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+    }
+
+    .icon-option:hover {
+      border-color: var(--bf-blue);
+      background: var(--bf-blue-light);
+    }
+
+    .icon-option.selected {
+      border-color: var(--bf-blue);
+      background: var(--bf-blue-light);
+      box-shadow: 0 0 0 3px rgba(25, 128, 229, 0.2);
+    }
+
+    .icon-option svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--bf-text-muted);
+      margin-top: 6px;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--border-light);
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--bf-blue);
+      background: var(--bf-blue-light);
+    }
+
+    .upload-placeholder svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--bf-text-muted);
+      margin-bottom: 12px;
+    }
+
+    .upload-placeholder p {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--bf-text);
+      margin-bottom: 4px;
+    }
+
+    .upload-placeholder span {
+      font-size: 12px;
+      color: var(--bf-text-muted);
+    }
+
+    .upload-preview {
+      position: relative;
+      display: inline-block;
+    }
+
+    .upload-preview img {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .upload-remove {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 28px;
+      height: 28px;
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+
+    .upload-remove:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+
+    .upload-remove svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Delete Modal */
+    .delete-modal-content {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .delete-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      background: var(--danger-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: var(--danger);
+    }
+
+    .delete-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--bf-text);
+      margin-bottom: 8px;
+    }
+
+    .delete-text {
+      font-size: 14px;
+      color: var(--bf-text-secondary);
+    }
+
+    /* ========== TOAST ========== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: var(--bf-dark);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    .toast svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-header {
+        padding: 0 16px;
+      }
+
+      .header-title,
+      .header-badge,
+      .user-email {
+        display: none;
+      }
+
+      .admin-main {
+        padding: 20px 16px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .btn-add {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .qr-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-footer {
+        flex-direction: column-reverse;
+      }
+
+      .btn-modal {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login View -->
+  <div id="loginView" class="login-view">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <svg viewBox="0 0 150 150">
+            <path fill="#fff" d="M45 0H0V45H45V0Z"/>
+            <path fill="#fff" d="M45 52.5H0V97.5H45V52.5Z"/>
+            <path fill="#fff" d="M45 105H0V150H45V105Z"/>
+            <path fill="#fff" d="M97.5 0H52.5V45H97.5V0Z"/>
+            <path fill="#fff" d="M150 0H105V45H150V0Z"/>
+            <path fill="#f7931a" d="M75 98C87.7 98 98 87.7 98 75C98 62.3 87.7 52 75 52C62.3 52 52 62.3 52 75C52 87.7 62.3 98 75 98Z"/>
+          </svg>
+          <span class="login-logo-text">bitFlyer</span>
+        </div>
+        <p class="login-title">Admin Console</p>
+      </div>
+      <div class="login-body">
+        <form id="loginForm">
+          <div id="loginError" class="form-error hidden">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <span id="loginErrorText"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input type="email" id="email" class="form-input" placeholder="admin@example.com" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn-login" id="loginBtn">ログイン</button>
+        </form>
+        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+          <p style="font-size: 12px; color: var(--bf-text-muted); text-align: center; margin-bottom: 12px;">開発モード</p>
+          <button type="button" class="btn-login" id="devLoginBtn" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); box-shadow: 0 4px 14px rgba(107, 114, 128, 0.4);">デモログイン（API不要）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin View -->
+  <div id="adminView" class="admin-view hidden">
+    <header class="admin-header">
+      <div class="header-logo">
+        <svg viewBox="0 0 150 150">
+          <path fill="#1980e5" d="M45 0H0V45H45V0Z"/>
+          <path fill="#1980e5" d="M45 52.5H0V97.5H45V52.5Z"/>
+          <path fill="#1980e5" d="M45 105H0V150H45V105Z"/>
+          <path fill="#1980e5" d="M97.5 0H52.5V45H97.5V0Z"/>
+          <path fill="#1980e5" d="M150 0H105V45H150V0Z"/>
+          <path fill="#f7931a" d="M75 98C87.7 98 98 87.7 98 75C98 62.3 87.7 52 75 52C62.3 52 52 62.3 52 75C52 87.7 62.3 98 75 98Z"/>
+        </svg>
+        <span class="header-title">bitFlyer</span>
+        <span class="header-badge">Admin</span>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <span class="user-email" id="userEmail"></span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          ログアウト
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div class="page-header">
+        <div class="page-title-group">
+          <h1 class="page-title">QR Code Management</h1>
+          <p class="page-subtitle">Manage wallet QR codes displayed on the frontend</p>
+        </div>
+        <button class="btn-add" id="addBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add QR Code
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total QR Codes</div>
+          <div class="stat-value blue" id="statTotal">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active</div>
+          <div class="stat-value green" id="statActive">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Inactive</div>
+          <div class="stat-value orange" id="statInactive">-</div>
+        </div>
+      </div>
+
+      <div id="qrContent">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Loading QR codes...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="qrModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Add QR Code</h3>
+        <button class="modal-close" id="modalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="qrForm">
+          <input type="hidden" id="qrId">
+
+          <div class="form-section">
+            <div class="form-section-title">Crypto Icon</div>
+            <div class="icon-selector" id="iconSelect">
+              <div class="icon-option" data-icon="BTC" title="Bitcoin">
+                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#fff" d="M22.5 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.7-.4-.7 2.6c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.01l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c.05.01.1.03.17.06l-.17-.04-1.1 4.5c-.1.2-.3.5-.8.4 0 0-1.2-.3-1.2-.3l-.8 2 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.7.4.7-2.7c.5.1.9.2 1.4.3l-.7 2.7 1.7.4.7-2.8c2.9.5 5.1.3 6-2.3.7-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-4 5.5c-.5 2.1-4.1 1-5.3.7l.9-3.8c1.2.3 4.9.9 4.4 3.1zm.5-5.6c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z"/></svg>
+              </div>
+              <div class="icon-option" data-icon="ETH" title="Ethereum">
+                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path fill="#fff" fill-opacity=".6" d="M16 4v8.87l7.5 3.35L16 4z"/><path fill="#fff" d="M16 4l-7.5 12.22L16 12.87V4z"/><path fill="#fff" fill-opacity=".6" d="M16 21.97v6.03l7.5-10.4L16 21.97z"/><path fill="#fff" d="M16 28v-6.03l-7.5-4.37L16 28z"/><path fill="#fff" fill-opacity=".2" d="M16 20.57l7.5-4.35L16 12.87v7.7z"/><path fill="#fff" fill-opacity=".6" d="M8.5 16.22l7.5 4.35v-7.7l-7.5 4.35z"/></svg>
+              </div>
+              <div class="icon-option" data-icon="XRP" title="Ripple">
+                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#23292F"/><path fill="#fff" d="M23.1 8h2.5l-5.8 5.6c-2.1 2-5.5 2-7.6 0L6.4 8h2.5l4.5 4.3c1.3 1.3 3.5 1.3 4.8 0L23.1 8zM8.9 24H6.4l5.8-5.6c2.1-2 5.5-2 7.6 0l5.8 5.6h-2.5l-4.5-4.3c-1.3-1.3-3.5-1.3-4.8 0L8.9 24z"/></svg>
+              </div>
+              <div class="icon-option" data-icon="USDT" title="Tether">
+                <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.9 17.9v-.003c-.1.007-.6.04-1.8.04-1 0-1.5-.03-1.7-.04v.004c-3.4-.15-5.9-.75-5.9-1.47 0-.72 2.5-1.32 5.9-1.47v2.34c.2.015.75.05 1.73.05 1.17 0 1.57-.04 1.77-.05v-2.34c3.4.15 5.9.75 5.9 1.47 0 .72-2.5 1.32-5.9 1.47zm0-3.18v-2.1h5v-3.2H9.1v3.2h5v2.1c-3.85.18-6.75.95-6.75 1.87 0 .92 2.9 1.7 6.75 1.87v6.7h3.6v-6.7c3.85-.17 6.75-.95 6.75-1.87 0-.92-2.9-1.7-6.75-1.87z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Basic Information</div>
+            <div class="form-group">
+              <label class="form-label" for="qrName">Name</label>
+              <input type="text" id="qrName" class="form-input" placeholder="e.g., Bitcoin" required>
+              <p class="form-hint">表示名（例：Bitcoin、Ethereum）</p>
+            </div>
+            <input type="hidden" id="qrFilename">
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">QR Code Image</div>
+            <div class="form-group">
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="qrImageFile" accept="image/*" style="display: none;">
+                <div class="upload-placeholder" id="uploadPlaceholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <p>ここにQRコード画像をドラッグ&ドロップ</p>
+                  <span>または クリックしてファイルを選択</span>
+                </div>
+                <div class="upload-preview" id="uploadPreview" style="display: none;">
+                  <img id="previewImage" src="" alt="Preview">
+                  <button type="button" class="upload-remove" id="removeImage">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <input type="hidden" id="qrImageUrl">
+              <input type="hidden" id="qrImageData">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Display URL（自動生成）</div>
+            <div class="form-group">
+              <label class="form-label">URL (ユーザーに表示)</label>
+              <div id="qrDisplayUrlPreview" style="padding: 12px 16px; background: var(--border-light); border-radius: 10px; font-size: 14px; color: var(--bf-text-secondary); word-break: break-all;">画像をアップロードすると自動生成されます</div>
+              <input type="hidden" id="qrDisplayUrl">
+              <p class="form-hint">フロントエンドでユーザーに表示されるURL</p>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Settings</div>
+            <div class="form-group">
+              <label class="form-label" for="qrSortOrder">Sort Order</label>
+              <input type="number" id="qrSortOrder" class="form-input" value="0" min="0" style="max-width: 120px;">
+              <p class="form-hint">Lower numbers appear first</p>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-modal btn-save" id="modalSave">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete QR Code</h3>
+        <button class="modal-close" id="deleteModalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-modal-content">
+          <div class="delete-icon">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </div>
+          <h4 class="delete-title">Are you sure?</h4>
+          <p class="delete-text">This action cannot be undone. The QR code will be permanently removed from the system.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal btn-cancel" id="deleteCancel">Cancel</button>
+        <button class="btn-modal btn-danger-modal" id="deleteConfirm">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg id="toastIcon" viewBox="0 0 24 24" fill="currentColor"></svg>
+    <span id="toastText"></span>
+  </div>
+
+  <script>
+    // Icons SVG
+    const ICONS = {
+      USDT: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.9 17.9v-.003c-.1.007-.6.04-1.8.04-1 0-1.5-.03-1.7-.04v.004c-3.4-.15-5.9-.75-5.9-1.47 0-.72 2.5-1.32 5.9-1.47v2.34c.2.015.75.05 1.73.05 1.17 0 1.57-.04 1.77-.05v-2.34c3.4.15 5.9.75 5.9 1.47 0 .72-2.5 1.32-5.9 1.47zm0-3.18v-2.1h5v-3.2H9.1v3.2h5v2.1c-3.85.18-6.75.95-6.75 1.87 0 .92 2.9 1.7 6.75 1.87v6.7h3.6v-6.7c3.85-.17 6.75-.95 6.75-1.87 0-.92-2.9-1.7-6.75-1.87z"/></svg>',
+      BTC: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#fff" d="M22.5 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.7-.4-.7 2.6c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.01l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c.05.01.1.03.17.06l-.17-.04-1.1 4.5c-.1.2-.3.5-.8.4 0 0-1.2-.3-1.2-.3l-.8 2 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.7.4.7-2.7c.5.1.9.2 1.4.3l-.7 2.7 1.7.4.7-2.8c2.9.5 5.1.3 6-2.3.7-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-4 5.5c-.5 2.1-4.1 1-5.3.7l.9-3.8c1.2.3 4.9.9 4.4 3.1zm.5-5.6c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z"/></svg>',
+      ETH: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path fill="#fff" fill-opacity=".6" d="M16 4v8.87l7.5 3.35L16 4z"/><path fill="#fff" d="M16 4l-7.5 12.22L16 12.87V4z"/><path fill="#fff" fill-opacity=".6" d="M16 21.97v6.03l7.5-10.4L16 21.97z"/><path fill="#fff" d="M16 28v-6.03l-7.5-4.37L16 28z"/><path fill="#fff" fill-opacity=".2" d="M16 20.57l7.5-4.35L16 12.87v7.7z"/><path fill="#fff" fill-opacity=".6" d="M8.5 16.22l7.5 4.35v-7.7l-7.5 4.35z"/></svg>',
+      XRP: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#23292F"/><path fill="#fff" d="M23.1 8h2.5l-5.8 5.6c-2.1 2-5.5 2-7.6 0L6.4 8h2.5l4.5 4.3c1.3 1.3 3.5 1.3 4.8 0L23.1 8zM8.9 24H6.4l5.8-5.6c2.1-2 5.5-2 7.6 0l5.8 5.6h-2.5l-4.5-4.3c-1.3-1.3-3.5-1.3-4.8 0L8.9 24z"/></svg>'
+    };
+
+    const TOAST_ICONS = {
+      success: '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>',
+      error: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>'
+    };
+
+    // State
+    let accessToken = localStorage.getItem('accessToken');
+    let qrCodes = [];
+    let selectedIcon = 'BTC';
+    let editingId = null;
+    let deletingId = null;
+    let uploadedImageData = null; // Base64 image data
+    let uploadedFileName = null;
+    let isDemoMode = false; // Track if using demo mode
+
+    // DOM Elements
+    const loginView = document.getElementById('loginView');
+    const adminView = document.getElementById('adminView');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const loginErrorText = document.getElementById('loginErrorText');
+    const userEmailEl = document.getElementById('userEmail');
+    const userAvatarEl = document.getElementById('userAvatar');
+    const qrContent = document.getElementById('qrContent');
+    const qrModal = document.getElementById('qrModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const toastEl = document.getElementById('toast');
+
+    // Toast
+    function toast(msg, type = 'success') {
+      document.getElementById('toastIcon').innerHTML = TOAST_ICONS[type];
+      document.getElementById('toastText').textContent = msg;
+      toastEl.className = `toast ${type}`;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 3000);
+    }
+
+    // API Helper
+    async function api(method, endpoint, data = null) {
+      const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' }
+      };
+
+      if (accessToken) {
+        options.headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+
+      if (data) {
+        options.body = JSON.stringify(data);
+      }
+
+      const res = await fetch(endpoint, options);
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json.error || 'API request failed');
+      }
+
+      return json;
+    }
+
+    // Auth
+    async function login(email, password) {
+      const result = await api('POST', '/api/auth/login', { email, password });
+      accessToken = result.access_token;
+      localStorage.setItem('accessToken', accessToken);
+      return result;
+    }
+
+    async function logout() {
+      try {
+        if (!isDemoMode) {
+          await api('POST', '/api/auth/logout');
+        }
+      } catch {}
+      accessToken = null;
+      isDemoMode = false;
+      localStorage.removeItem('accessToken');
+      showLoginView();
+    }
+
+    async function verifyToken() {
+      if (!accessToken) return false;
+      try {
+        const result = await api('GET', '/api/auth/verify');
+        return result.user;
+      } catch {
+        accessToken = null;
+        localStorage.removeItem('accessToken');
+        return false;
+      }
+    }
+
+    // Views
+    function showLoginView() {
+      loginView.classList.remove('hidden');
+      adminView.classList.add('hidden');
+    }
+
+    function showAdminView(user) {
+      loginView.classList.add('hidden');
+      adminView.classList.remove('hidden');
+      userEmailEl.textContent = user.email;
+      userAvatarEl.textContent = user.email.charAt(0).toUpperCase();
+      loadQRCodes();
+    }
+
+    // QR Codes
+    async function loadQRCodes() {
+      if (isDemoMode) {
+        // Demo mode: Don't fetch from API, just render current data
+        updateStats();
+        renderQRCards();
+        return;
+      }
+
+      qrContent.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div><p class="loading-text">Loading QR codes...</p></div>';
+
+      try {
+        const result = await api('GET', '/api/qr');
+        qrCodes = result.data || [];
+        updateStats();
+        renderQRCards();
+      } catch (err) {
+        toast('Failed to load QR codes', 'error');
+        qrContent.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><h3 class="empty-title">Error loading data</h3><p class="empty-text">Please try refreshing the page.</p></div>';
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').textContent = qrCodes.length;
+      document.getElementById('statActive').textContent = qrCodes.filter(q => q.is_active).length;
+      document.getElementById('statInactive').textContent = qrCodes.filter(q => !q.is_active).length;
+    }
+
+    function renderQRCards() {
+      if (qrCodes.length === 0) {
+        qrContent.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/><path d="M7 12h2v5H7zm4-3h2v8h-2zm4-3h2v11h-2z"/></svg>
+            </div>
+            <h3 class="empty-title">No QR codes yet</h3>
+            <p class="empty-text">Add your first QR code to get started.</p>
+            <button class="btn-add" onclick="openModal('Add QR Code')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add QR Code
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      qrContent.innerHTML = `
+        <div class="qr-grid">
+          ${qrCodes.map(qr => `
+            <div class="qr-card">
+              <div class="qr-card-header">
+                <div class="qr-icon">${ICONS[qr.icon_type] || ICONS.BTC}</div>
+                <div class="qr-info">
+                  <div class="qr-name">${escapeHtml(qr.name)}</div>
+                  <div class="qr-filename">${escapeHtml(qr.filename)}</div>
+                </div>
+                <span class="qr-status ${qr.is_active ? 'active' : 'inactive'}">${qr.is_active ? 'Active' : 'Inactive'}</span>
+              </div>
+              <div class="qr-card-body">
+                ${(qr.image_data || qr.image_url) ? `
+                <div class="qr-thumbnail">
+                  <img src="${qr.image_data || qr.image_url}" alt="${escapeHtml(qr.name)}">
+                </div>
+                ` : ''}
+                <div class="qr-detail">
+                  <span class="qr-detail-label">Display</span>
+                  <span class="qr-detail-value"><a href="${escapeHtml(qr.display_url)}" target="_blank" rel="noopener">${escapeHtml(qr.display_url)}</a></span>
+                </div>
+                <div class="qr-detail">
+                  <span class="qr-detail-label">Order</span>
+                  <span class="qr-detail-value">${qr.sort_order}</span>
+                </div>
+              </div>
+              <div class="qr-card-footer">
+                <button class="btn-card btn-edit" onclick="editQR('${qr.id}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Edit
+                </button>
+                <button class="btn-card btn-delete" onclick="confirmDelete('${qr.id}')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Modal
+    function openModal(title, qr = null) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalSave').textContent = qr ? 'Save Changes' : 'Add QR Code';
+      editingId = qr ? qr.id : null;
+
+      // Reset image upload
+      clearImageUpload();
+
+      if (qr) {
+        document.getElementById('qrId').value = qr.id;
+        document.getElementById('qrName').value = qr.name;
+        document.getElementById('qrFilename').value = qr.filename;
+        document.getElementById('qrImageUrl').value = qr.image_url;
+        document.getElementById('qrDisplayUrl').value = qr.display_url;
+        document.getElementById('qrSortOrder').value = qr.sort_order;
+        selectIcon(qr.icon_type);
+
+        // Show display URL preview
+        document.getElementById('qrDisplayUrlPreview').textContent = qr.display_url;
+        document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text)';
+
+        // Show existing image if available
+        if (qr.image_url || qr.image_data) {
+          const previewImg = document.getElementById('previewImage');
+          previewImg.src = qr.image_data || qr.image_url;
+          document.getElementById('uploadPlaceholder').style.display = 'none';
+          document.getElementById('uploadPreview').style.display = 'inline-block';
+          uploadedImageData = qr.image_data || null;
+        }
+      } else {
+        document.getElementById('qrForm').reset();
+        document.getElementById('qrSortOrder').value = qrCodes.length;
+        selectIcon('BTC');
+        // Reset display URL preview for new entry
+        document.getElementById('qrDisplayUrlPreview').textContent = '画像をアップロードすると自動生成されます';
+        document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text-secondary)';
+      }
+
+      qrModal.classList.add('show');
+    }
+
+    function closeModal() {
+      qrModal.classList.remove('show');
+      editingId = null;
+      clearImageUpload();
+    }
+
+    function selectIcon(icon) {
+      selectedIcon = icon;
+      document.querySelectorAll('.icon-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.icon === icon);
+      });
+    }
+
+    async function saveQR() {
+      const saveBtn = document.getElementById('modalSave');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      const filename = document.getElementById('qrFilename').value;
+      const imageUrl = document.getElementById('qrImageUrl').value;
+      const displayUrl = document.getElementById('qrDisplayUrl').value;
+
+      const data = {
+        name: document.getElementById('qrName').value,
+        filename: filename,
+        image_url: imageUrl,
+        display_url: displayUrl,
+        icon_type: selectedIcon,
+        sort_order: parseInt(document.getElementById('qrSortOrder').value, 10) || 0
+      };
+
+      // Only include image_data for demo mode
+      if (isDemoMode && uploadedImageData && uploadedImageData.startsWith('data:')) {
+        data.image_data = uploadedImageData;
+      }
+
+      // Validation
+      if (!data.name) {
+        toast('名前を入力してください', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = editingId ? 'Save Changes' : 'Add QR Code';
+        return;
+      }
+
+      if (!data.image_url && !editingId) {
+        toast('QRコード画像をアップロードしてください', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Add QR Code';
+        return;
+      }
+
+      if (!data.filename || !data.display_url) {
+        toast('画像をアップロードしてください', 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = editingId ? 'Save Changes' : 'Add QR Code';
+        return;
+      }
+
+      try {
+        if (isDemoMode) {
+          // Demo mode: Update local data only
+          if (editingId) {
+            const index = qrCodes.findIndex(q => q.id === editingId);
+            if (index !== -1) {
+              qrCodes[index] = { ...qrCodes[index], ...data };
+            }
+            toast('QR code updated (demo mode)');
+          } else {
+            data.id = Date.now().toString();
+            data.is_active = true;
+            qrCodes.push(data);
+            toast('QR code added (demo mode)');
+          }
+          updateStats();
+          renderQRCards();
+        } else {
+          // Real mode: Call API
+          if (editingId) {
+            await api('PUT', `/api/qr/${editingId}`, data);
+            toast('QR code updated successfully');
+          } else {
+            await api('POST', '/api/qr-create', data);
+            toast('QR code added successfully');
+          }
+          await loadQRCodes(); // Reload from API
+        }
+        closeModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = editingId ? 'Save Changes' : 'Add QR Code';
+      }
+    }
+
+    function editQR(id) {
+      const qr = qrCodes.find(q => q.id === id);
+      if (qr) {
+        openModal('Edit QR Code', qr);
+      }
+    }
+
+    // Delete
+    function confirmDelete(id) {
+      deletingId = id;
+      deleteModal.classList.add('show');
+    }
+
+    function closeDeleteModal() {
+      deleteModal.classList.remove('show');
+      deletingId = null;
+    }
+
+    async function deleteQR() {
+      if (!deletingId) return;
+
+      const deleteBtn = document.getElementById('deleteConfirm');
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = 'Deleting...';
+
+      try {
+        if (isDemoMode) {
+          // Demo mode: Remove from local data
+          const index = qrCodes.findIndex(q => q.id === deletingId);
+          if (index !== -1) {
+            qrCodes.splice(index, 1);
+          }
+          toast('QR code deleted (demo mode)');
+          updateStats();
+          renderQRCards();
+        } else {
+          // Real mode: Call API
+          await api('DELETE', `/api/qr/${deletingId}`);
+          toast('QR code deleted successfully');
+          await loadQRCodes(); // Reload from API
+        }
+        closeDeleteModal();
+      } catch (err) {
+        toast(err.message, 'error');
+      } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = 'Delete';
+      }
+    }
+
+    // Event Listeners
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const btn = document.getElementById('loginBtn');
+
+      btn.disabled = true;
+      btn.classList.add('loading');
+      loginError.classList.add('hidden');
+
+      try {
+        await login(email, password);
+        isDemoMode = false; // Real login, not demo mode
+        showAdminView({ email });
+      } catch (err) {
+        loginErrorText.textContent = err.message;
+        loginError.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('loading');
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('addBtn').addEventListener('click', () => openModal('Add QR Code'));
+
+    // Dev login (bypasses API - for development only)
+    document.getElementById('devLoginBtn').addEventListener('click', () => {
+      isDemoMode = true; // Set demo mode flag
+      showAdminView({ email: 'dev@example.com' });
+      // Load demo data instead of API
+      qrCodes = [
+        { id: '1', name: 'BTC', filename: 'BTC.jpg', image_url: './BTC.jpg', display_url: 'https://walletcoin.edgeone.app/BTC.jpg', icon_type: 'USDT', sort_order: 1, is_active: true },
+        { id: '2', name: 'Bitcoincash BCH', filename: 'Bitcoincash_BCH.jpg', image_url: './Bitcoincash_BCH.jpg', display_url: 'https://walletcoin.edgeone.app/Bitcoincash_BCH.jpg', icon_type: 'BTC', sort_order: 2, is_active: true },
+        { id: '3', name: 'Ethereum ETH', filename: 'Ethereum_ETH.jpg', image_url: './Ethereum_ETH.jpg', display_url: 'https://walletcoin.edgeone.app/Ethereum_ETH.jpg', icon_type: 'ETH', sort_order: 3, is_active: true },
+        { id: '4', name: 'Ripple XRP', filename: 'Ripple_XRP.jpg', image_url: './Ripple_XRP.jpg', display_url: 'https://walletcoin.edgeone.app/Ripple_XRP.jpg', icon_type: 'XRP', sort_order: 4, is_active: true }
+      ];
+      updateStats();
+      renderQRCards();
+      toast('デモモードでログインしました');
+    });
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalCancel').addEventListener('click', closeModal);
+    document.getElementById('modalSave').addEventListener('click', saveQR);
+    document.getElementById('deleteModalClose').addEventListener('click', closeDeleteModal);
+    document.getElementById('deleteCancel').addEventListener('click', closeDeleteModal);
+    document.getElementById('deleteConfirm').addEventListener('click', deleteQR);
+
+    document.getElementById('iconSelect').addEventListener('click', (e) => {
+      const option = e.target.closest('.icon-option');
+      if (option) {
+        selectIcon(option.dataset.icon);
+      }
+    });
+
+    // Image Upload Handling
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const uploadPreview = document.getElementById('uploadPreview');
+    const previewImage = document.getElementById('previewImage');
+    const qrImageFile = document.getElementById('qrImageFile');
+
+    uploadZone.addEventListener('click', () => {
+      qrImageFile.click();
+    });
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleImageUpload(file);
+      }
+    });
+
+    qrImageFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleImageUpload(file);
+      }
+    });
+
+    document.getElementById('removeImage').addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearImageUpload();
+    });
+
+    async function handleImageUpload(file) {
+      uploadedFileName = file.name;
+
+      // Show preview immediately using local file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImage.src = e.target.result;
+        uploadPlaceholder.style.display = 'none';
+        uploadPreview.style.display = 'inline-block';
+      };
+      reader.readAsDataURL(file);
+
+      // Update UI to show uploading state
+      document.getElementById('qrDisplayUrlPreview').textContent = 'アップロード中...';
+      document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-blue)';
+
+      if (isDemoMode) {
+        // Demo mode: Use local Base64 data
+        const readerBase64 = new FileReader();
+        readerBase64.onload = (e) => {
+          uploadedImageData = e.target.result;
+          document.getElementById('qrFilename').value = file.name;
+          const displayUrl = `./demo/${file.name}`;
+          document.getElementById('qrDisplayUrl').value = displayUrl;
+          document.getElementById('qrImageUrl').value = displayUrl;
+          document.getElementById('qrDisplayUrlPreview').textContent = displayUrl + ' (デモモード)';
+          document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text)';
+        };
+        readerBase64.readAsDataURL(file);
+        return;
+      }
+
+      // Real mode: Upload to Supabase Storage via API
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Upload failed');
+        }
+
+        // Update form fields with Supabase Storage URLs
+        uploadedImageData = result.data.image_url; // Store the URL instead of base64
+        document.getElementById('qrFilename').value = result.data.filename;
+        document.getElementById('qrImageUrl').value = result.data.image_url;
+        document.getElementById('qrDisplayUrl').value = result.data.image_url;
+        document.getElementById('qrDisplayUrlPreview').textContent = result.data.image_url;
+        document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text)';
+
+        toast('画像をアップロードしました', 'success');
+
+      } catch (err) {
+        console.error('Upload error:', err);
+        toast('画像のアップロードに失敗しました: ' + err.message, 'error');
+        clearImageUpload();
+      }
+    }
+
+    function clearImageUpload() {
+      uploadedImageData = null;
+      uploadedFileName = null;
+      previewImage.src = '';
+      uploadPlaceholder.style.display = 'block';
+      uploadPreview.style.display = 'none';
+      // Reset display URL preview
+      document.getElementById('qrDisplayUrl').value = '';
+      document.getElementById('qrDisplayUrlPreview').textContent = '画像をアップロードすると自動生成されます';
+      document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text-secondary)';
+      qrImageFile.value = '';
+    }
+
+    // Close modals on overlay click
+    qrModal.addEventListener('click', (e) => {
+      if (e.target === qrModal) closeModal();
+    });
+    deleteModal.addEventListener('click', (e) => {
+      if (e.target === deleteModal) closeDeleteModal();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        closeDeleteModal();
+      }
+    });
+
+    // Init
+    async function init() {
+      const user = await verifyToken();
+      if (user) {
+        isDemoMode = false; // Verified via API, not demo mode
+        showAdminView(user);
+      } else {
+        showLoginView();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
