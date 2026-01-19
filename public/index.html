@@ -660,6 +660,84 @@
       background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
     }
 
+    /* Batch Save Modal (iOS) */
+    .batch-save-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .batch-save-modal.hidden { display: none; }
+    .batch-save-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+    }
+    .batch-save-modal-content {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 90vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      text-align: center;
+    }
+    .batch-save-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 50%;
+      font-size: 18px;
+      color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .batch-save-modal-close:hover {
+      background: #eee;
+    }
+    .batch-save-modal-instruction {
+      margin-bottom: 20px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .batch-save-images {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .batch-save-images img {
+      width: 100%;
+      border-radius: 8px;
+      -webkit-touch-callout: default !important;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .batch-save-modal-done {
+      padding: 12px 32px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.25);
+    }
+    .batch-save-modal-done:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+    }
+
     /* Responsive */
     @media (max-width: 420px) {
       .main { padding: 16px 12px 24px; }
@@ -734,7 +812,7 @@
       </div>
 
       <div class="foot">
-        <button class="btn-all" id="dlAll" disabled>すべて写真に保存</button>
+        <button class="btn-all" id="dlAll" disabled>すべて画像を保存</button>
       </div>
 
       <div class="company">
@@ -911,6 +989,24 @@
         if (completionOverlay) {
           completionOverlay.addEventListener('click', () => this.hideCompletionModal());
         }
+
+        // Batch save modal events
+        const batchSaveModalClose = document.getElementById('batchSaveModalClose');
+        const batchSaveModalDone = document.getElementById('batchSaveModalDone');
+        const batchSaveOverlay = document.getElementById('batchSaveModal')?.querySelector('.batch-save-modal-overlay');
+
+        if (batchSaveModalClose) {
+          batchSaveModalClose.addEventListener('click', () => this.hideBatchSaveModal());
+        }
+        if (batchSaveModalDone) {
+          batchSaveModalDone.addEventListener('click', () => {
+            this.hideBatchSaveModal();
+            this.showCompletionModal();
+          });
+        }
+        if (batchSaveOverlay) {
+          batchSaveOverlay.addEventListener('click', () => this.hideBatchSaveModal());
+        }
       }
 
       sleep(ms) {
@@ -1038,6 +1134,27 @@
         }
       }
 
+      // Batch save modal (iOS)
+      showBatchSaveModal(images) {
+        const modal = document.getElementById('batchSaveModal');
+        const container = document.getElementById('batchSaveImages');
+
+        if (modal && container) {
+          // Generate image elements
+          container.innerHTML = images.map(img =>
+            `<img src="${img.url}" alt="${img.name}">`
+          ).join('');
+          modal.classList.remove('hidden');
+        }
+      }
+
+      hideBatchSaveModal() {
+        const modal = document.getElementById('batchSaveModal');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+      }
+
       // Traditional download
       async download(imageUrl, filename) {
         try {
@@ -1071,6 +1188,13 @@
       async saveAll(images) {
         if (images.length === 0) return [];
 
+        // iOS: Use batch save modal with long-press
+        if (this.isIOS) {
+          this.showBatchSaveModal(images);
+          return []; // User will save manually via long-press
+        }
+
+        // Android/Desktop: Use Web Share API or download
         this.isCancelled = false;
         this._batchSaveInProgress = true;
         const results = [];
@@ -1140,7 +1264,7 @@
           </div>
           <div class="actions">
             <button class="btn-copy" data-url="${d.displayUrl}" title="コピー">${COPY_ICON}</button>
-            <button class="btn-dl" data-i="${i}">写真に保存</button>
+            <button class="btn-dl" data-i="${i}">画像を保存</button>
           </div>
         </div>
       `).join('');
@@ -1225,7 +1349,7 @@
           const item = DATA[dl.dataset.i];
           const result = await imageSaver.save(item.url, item.name);
           dl.disabled = false;
-          dl.textContent = '写真に保存';
+          dl.textContent = '画像を保存';
           if (result && result.success) {
             // Show completion modal for all successful saves (except iOS modal which handles it separately)
             if (result.method !== 'modal') {
