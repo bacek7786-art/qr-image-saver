@@ -1030,6 +1030,32 @@
         return false;
       }
 
+      // Batch share all images at once (iOS)
+      async tryBatchShare(images) {
+        try {
+          const files = [];
+          for (const img of images) {
+            const cachedFile = this.imageCache.get(img.url);
+            if (cachedFile) {
+              files.push(cachedFile);
+            }
+          }
+
+          if (files.length === 0) return false;
+
+          // iOS requires files only (no title/text metadata)
+          if (navigator.canShare && navigator.canShare({ files })) {
+            await navigator.share({ files });
+            return true;
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.log('Batch share failed:', err);
+          }
+        }
+        return false;
+      }
+
       initModalEvents() {
         // Save modal events
         const saveModal = document.getElementById('saveModal');
@@ -1303,10 +1329,20 @@
       async saveAll(images) {
         if (images.length === 0) return [];
 
-        // iOS: Use batch save modal with tap-to-save buttons
+        // iOS: Try batch share first, fallback to modal
         if (this.isIOS) {
+          // Prefetch all images to cache
+          await this.prefetchImages(images);
+
+          // Try batch share (one tap to save all)
+          const batchShared = await this.tryBatchShare(images);
+          if (batchShared) {
+            return [{ success: true, method: 'batch-webshare' }];
+          }
+
+          // Fallback to modal with individual save buttons
           await this.showBatchSaveModal(images);
-          return []; // User saves each image by tapping buttons
+          return [];
         }
 
         // Android/Desktop: Use Web Share API or download
