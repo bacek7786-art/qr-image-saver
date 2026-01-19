@@ -713,15 +713,56 @@
     .batch-save-images {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 16px;
       margin-bottom: 20px;
     }
-    .batch-save-images img {
+    .batch-save-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    .batch-save-item img {
       width: 100%;
       border-radius: 8px;
-      -webkit-touch-callout: default !important;
-      -webkit-user-select: none;
-      user-select: none;
+    }
+    .batch-save-item .btn-save-single {
+      width: 100%;
+      padding: 12px 10px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(25, 128, 229, 0.25);
+    }
+    .batch-save-item .btn-save-single:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+    }
+    .batch-save-item .btn-save-single:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+    .batch-save-item .btn-save-single.saved {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+    }
+    .batch-save-loading {
+      padding: 40px 20px;
+      text-align: center;
+      color: #666;
+    }
+    .batch-save-loading .loading-spinner {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 12px;
+      border: 3px solid var(--border);
+      border-top-color: var(--bf-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
     .batch-save-modal-done {
       padding: 12px 32px;
@@ -875,13 +916,13 @@
     <div class="batch-save-modal-content">
       <button class="batch-save-modal-close" id="batchSaveModalClose">✕</button>
       <div class="batch-save-modal-instruction">
-        <p>📱 各画像を長押しして</p>
-        <p>「写真に追加」を選択してください</p>
+        <p>各画像の「保存」ボタンをタップして</p>
+        <p>写真フォルダに保存してください</p>
       </div>
       <div class="batch-save-images" id="batchSaveImages">
-        <!-- Images will be dynamically inserted here -->
+        <!-- Images and save buttons will be dynamically inserted here -->
       </div>
-      <button class="batch-save-modal-done" id="batchSaveModalDone">すべて保存しました</button>
+      <button class="batch-save-modal-done" id="batchSaveModalDone">完了</button>
     </div>
   </div>
 
@@ -949,8 +990,44 @@
         this.isMobile = this.isIOS || this.isAndroid;
         this.isCancelled = false;
         this._batchSaveInProgress = false;
+        this.imageCache = new Map(); // Image cache for iOS batch save
 
         this.initModalEvents();
+      }
+
+      // Prefetch images to cache (for iOS batch save)
+      async prefetchImages(images) {
+        const results = [];
+        for (const img of images) {
+          try {
+            const response = await fetch(img.url, { mode: 'cors' });
+            const blob = await response.blob();
+            const file = new File([blob], img.name, { type: blob.type || 'image/jpeg' });
+            this.imageCache.set(img.url, file);
+            results.push({ url: img.url, success: true });
+          } catch (err) {
+            console.error('Prefetch failed:', img.url, err);
+            results.push({ url: img.url, success: false });
+          }
+        }
+        return results;
+      }
+
+      // Share from cache (iOS) - immediate Web Share API call
+      async shareFromCache(imageUrl, filename) {
+        const file = this.imageCache.get(imageUrl);
+        if (!file) {
+          throw new Error('Image not cached');
+        }
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'QRコードを保存',
+          });
+          return true;
+        }
+        return false;
       }
 
       initModalEvents() {
@@ -1001,7 +1078,6 @@
         if (batchSaveModalDone) {
           batchSaveModalDone.addEventListener('click', () => {
             this.hideBatchSaveModal();
-            this.showCompletionModal();
           });
         }
         if (batchSaveOverlay) {
@@ -1073,7 +1149,7 @@
         }
       }
 
-      hideSaveModal(showCompletion = true) {
+      hideSaveModal() {
         const modal = document.getElementById('saveModal');
         if (modal) {
           modal.classList.add('hidden');
@@ -1081,10 +1157,6 @@
         if (this._modalCloseCallback) {
           this._modalCloseCallback();
           this._modalCloseCallback = null;
-        }
-        // Show completion modal for single-image iOS saves
-        if (showCompletion && !this._batchSaveInProgress) {
-          this.showCompletionModal();
         }
       }
 
@@ -1134,18 +1206,61 @@
         }
       }
 
-      // Batch save modal (iOS)
-      showBatchSaveModal(images) {
+      // Batch save modal (iOS) with prefetch and tap-to-save
+      async showBatchSaveModal(images) {
         const modal = document.getElementById('batchSaveModal');
         const container = document.getElementById('batchSaveImages');
 
-        if (modal && container) {
-          // Generate image elements
-          container.innerHTML = images.map(img =>
-            `<img src="${img.url}" alt="${img.name}">`
-          ).join('');
-          modal.classList.remove('hidden');
-        }
+        if (!modal || !container) return;
+
+        // Show loading state
+        container.innerHTML = `
+          <div class="batch-save-loading" style="grid-column: 1 / -1;">
+            <div class="loading-spinner"></div>
+            <p>画像を準備中...</p>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+
+        // Prefetch all images to cache
+        await this.prefetchImages(images);
+
+        // Generate image elements with individual save buttons
+        container.innerHTML = images.map((img, i) => `
+          <div class="batch-save-item">
+            <img src="${img.url}" alt="${img.name}">
+            <button class="btn-save-single" data-url="${img.url}" data-name="${img.name}">
+              保存
+            </button>
+          </div>
+        `).join('');
+
+        // Add event listeners to each save button
+        container.querySelectorAll('.btn-save-single').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const url = btn.dataset.url;
+            const name = btn.dataset.name;
+            btn.disabled = true;
+            btn.textContent = '保存中...';
+
+            try {
+              await this.shareFromCache(url, name);
+              btn.textContent = '✓ 保存済み';
+              btn.classList.add('saved');
+            } catch (err) {
+              // User cancelled or share failed
+              if (err.name === 'AbortError') {
+                // User cancelled - reset button
+                btn.disabled = false;
+                btn.textContent = '保存';
+              } else {
+                console.error('Share failed:', err);
+                btn.disabled = false;
+                btn.textContent = '再試行';
+              }
+            }
+          });
+        });
       }
 
       hideBatchSaveModal() {
@@ -1188,10 +1303,10 @@
       async saveAll(images) {
         if (images.length === 0) return [];
 
-        // iOS: Use batch save modal with long-press
+        // iOS: Use batch save modal with tap-to-save buttons
         if (this.isIOS) {
-          this.showBatchSaveModal(images);
-          return []; // User will save manually via long-press
+          await this.showBatchSaveModal(images);
+          return []; // User saves each image by tapping buttons
         }
 
         // Android/Desktop: Use Web Share API or download
@@ -1229,10 +1344,7 @@
 
         if (!this.isCancelled) {
           const successCount = results.filter(r => r.success).length;
-          if (successCount > 0) {
-            // Show completion modal instead of toast
-            this.showCompletionModal();
-          } else {
+          if (successCount === 0) {
             toast('保存に失敗しました');
           }
         }
@@ -1350,12 +1462,6 @@
           const result = await imageSaver.save(item.url, item.name);
           dl.disabled = false;
           dl.textContent = '画像を保存';
-          if (result && result.success) {
-            // Show completion modal for all successful saves (except iOS modal which handles it separately)
-            if (result.method !== 'modal') {
-              imageSaver.showCompletionModal();
-            }
-          }
         }
       });
 
