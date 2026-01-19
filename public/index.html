@@ -596,6 +596,70 @@
       background: #eee;
     }
 
+    /* Completion Modal */
+    .completion-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .completion-modal.hidden { display: none; }
+    .completion-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .completion-modal-content {
+      position: relative;
+      background: #fff;
+      border-radius: 20px;
+      padding: 32px 40px;
+      text-align: center;
+      max-width: 85vw;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .completion-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #fff;
+    }
+    .completion-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    .completion-message {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .completion-btn {
+      min-width: 120px;
+      height: 48px;
+      background: linear-gradient(135deg, #1980e5 0%, #2d95f0 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(25, 128, 229, 0.3);
+    }
+    .completion-btn:hover {
+      background: linear-gradient(135deg, #1368c0 0%, #1980e5 100%);
+    }
+
     /* Responsive */
     @media (max-width: 420px) {
       .main { padding: 16px 12px 24px; }
@@ -727,6 +791,19 @@
     </div>
   </div>
 
+  <!-- Completion Modal -->
+  <div id="completionModal" class="completion-modal hidden">
+    <div class="completion-modal-overlay"></div>
+    <div class="completion-modal-content">
+      <div class="completion-icon">✓</div>
+      <h2 class="completion-title">保存が完了しました</h2>
+      <p class="completion-message">
+        📱 写真フォルダ（カメラロール）<br>を確認してください
+      </p>
+      <button class="completion-btn" id="completionOk">OK</button>
+    </div>
+  </div>
+
   <script>
     // Crypto Icons SVG
     const ICONS = {
@@ -777,6 +854,7 @@
         this.isAndroid = /Android/.test(navigator.userAgent);
         this.isMobile = this.isIOS || this.isAndroid;
         this.isCancelled = false;
+        this._batchSaveInProgress = false;
 
         this.initModalEvents();
       }
@@ -805,6 +883,17 @@
             this.isCancelled = true;
             this.hideProgressModal();
           });
+        }
+
+        // Completion modal events
+        const completionOk = document.getElementById('completionOk');
+        const completionOverlay = document.getElementById('completionModal')?.querySelector('.completion-modal-overlay');
+
+        if (completionOk) {
+          completionOk.addEventListener('click', () => this.hideCompletionModal());
+        }
+        if (completionOverlay) {
+          completionOverlay.addEventListener('click', () => this.hideCompletionModal());
         }
       }
 
@@ -872,7 +961,7 @@
         }
       }
 
-      hideSaveModal() {
+      hideSaveModal(showCompletion = true) {
         const modal = document.getElementById('saveModal');
         if (modal) {
           modal.classList.add('hidden');
@@ -880,6 +969,10 @@
         if (this._modalCloseCallback) {
           this._modalCloseCallback();
           this._modalCloseCallback = null;
+        }
+        // Show completion modal for single-image iOS saves
+        if (showCompletion && !this._batchSaveInProgress) {
+          this.showCompletionModal();
         }
       }
 
@@ -909,6 +1002,21 @@
 
       hideProgressModal() {
         const modal = document.getElementById('progressModal');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+      }
+
+      // Completion modal
+      showCompletionModal() {
+        const modal = document.getElementById('completionModal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        }
+      }
+
+      hideCompletionModal() {
+        const modal = document.getElementById('completionModal');
         if (modal) {
           modal.classList.add('hidden');
         }
@@ -948,6 +1056,7 @@
         if (images.length === 0) return [];
 
         this.isCancelled = false;
+        this._batchSaveInProgress = true;
         const results = [];
 
         this.showProgressModal(0, images.length);
@@ -976,11 +1085,13 @@
         }
 
         this.hideProgressModal();
+        this._batchSaveInProgress = false;
 
         if (!this.isCancelled) {
           const successCount = results.filter(r => r.success).length;
           if (successCount > 0) {
-            toast(`${successCount}枚の画像を保存しました`);
+            // Show completion modal instead of toast
+            this.showCompletionModal();
           } else {
             toast('保存に失敗しました');
           }
@@ -1099,12 +1210,11 @@
           const result = await imageSaver.save(item.url, item.name);
           dl.disabled = false;
           dl.textContent = '写真に保存';
-          if (result && result.method === 'webshare') {
-            toast('共有しました');
-          } else if (result && result.method === 'modal') {
-            // Toast already shown or user will long-press
-          } else {
-            toast('ダウンロードしました');
+          if (result && result.success) {
+            // Show completion modal for all successful saves (except iOS modal which handles it separately)
+            if (result.method !== 'modal') {
+              imageSaver.showCompletionModal();
+            }
           }
         }
       });
