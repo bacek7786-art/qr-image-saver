@@ -215,6 +215,19 @@
       width: 28px;
       height: 28px;
     }
+
+    /* Checkbox */
+    .item-checkbox {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--bf-blue);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .item.selected {
+      background: var(--bf-blue-light);
+    }
+
     .url-wrap {
       flex: 1;
       min-width: 0;
@@ -853,7 +866,7 @@
       </div>
 
       <div class="foot">
-        <button class="btn-all" id="dlAll" disabled>すべて画像を保存</button>
+        <button class="btn-all" id="dlAll" disabled>選択した通貨を保存</button>
       </div>
 
       <div class="company">
@@ -1393,6 +1406,31 @@
     let imageSaver = null;
     let busy = false;
 
+    // Track selected items
+    let selectedItems = new Set();
+
+    function updateButtonState() {
+      const btn = document.getElementById('dlAll');
+      if (btn) {
+        btn.disabled = selectedItems.size === 0;
+        btn.textContent = selectedItems.size > 0
+          ? `選択した通貨を保存 (${selectedItems.size})`
+          : '選択した通貨を保存';
+      }
+    }
+
+    function toggleSelection(index, checkbox) {
+      const item = checkbox.closest('.item');
+      if (checkbox.checked) {
+        selectedItems.add(index);
+        item.classList.add('selected');
+      } else {
+        selectedItems.delete(index);
+        item.classList.remove('selected');
+      }
+      updateButtonState();
+    }
+
     function render() {
       const list = document.getElementById('list');
       const dlAllBtn = document.getElementById('dlAll');
@@ -1403,9 +1441,13 @@
         return;
       }
 
-      dlAllBtn.disabled = false;
+      // Reset selection
+      selectedItems.clear();
+      updateButtonState();
+
       list.innerHTML = DATA.map((d, i) => `
         <div class="item">
+          <input type="checkbox" class="item-checkbox" data-i="${i}">
           <div class="crypto-icon">${ICONS[d.icon] || ICONS.BTC}</div>
           <div class="url-wrap">
             <a class="url" href="${d.displayUrl}" target="_blank" rel="noopener" title="${d.displayUrl}">${d.displayUrl}</a>
@@ -1416,6 +1458,13 @@
           </div>
         </div>
       `).join('');
+
+      // Add checkbox event listeners
+      list.querySelectorAll('.item-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          toggleSelection(parseInt(cb.dataset.i), cb);
+        });
+      });
     }
 
     function renderError(message) {
@@ -1460,23 +1509,29 @@
       }
     }
 
-    // Save all images function
-    async function saveAll() {
-      if (busy || DATA.length === 0 || !imageSaver) return;
+    // Save selected images function
+    async function saveSelected() {
+      if (busy || selectedItems.size === 0 || !imageSaver) return;
+
+      // Get selected items data
+      const selectedData = Array.from(selectedItems)
+        .sort((a, b) => a - b)
+        .map(i => DATA[i]);
+
       busy = true;
       const btn = document.getElementById('dlAll');
       btn.disabled = true;
       btn.classList.add('busy');
 
       try {
-        await imageSaver.saveAll(DATA);
+        await imageSaver.saveAll(selectedData);
       } catch (e) {
         console.error(e);
         toast('エラーが発生しました');
       }
 
       busy = false;
-      btn.disabled = false;
+      updateButtonState();
       btn.classList.remove('busy');
     }
 
@@ -1501,7 +1556,7 @@
         }
       });
 
-      document.getElementById('dlAll').addEventListener('click', saveAll);
+      document.getElementById('dlAll').addEventListener('click', saveSelected);
     });
   </script>
 </body>
