@@ -1313,6 +1313,8 @@
     <span id="toastText"></span>
   </div>
 
+  <!-- Supabase Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Icons SVG
     const ICONS = {
@@ -1336,6 +1338,20 @@
     let uploadedImageData = null; // Base64 image data
     let uploadedFileName = null;
     let isDemoMode = false; // Track if using demo mode
+    let supabaseClient = null; // Supabase client for direct uploads
+
+    // Initialize Supabase client for storage uploads
+    async function initSupabase() {
+      try {
+        const res = await fetch('/api/config');
+        const config = await res.json();
+        if (config.supabaseUrl && config.supabaseAnonKey) {
+          supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+        }
+      } catch (err) {
+        console.warn('Failed to init Supabase client:', err);
+      }
+    }
 
     // DOM Elements
     const loginView = document.getElementById('loginView');
@@ -1428,6 +1444,8 @@
       userEmailEl.textContent = user.email;
       userAvatarEl.textContent = user.email.charAt(0).toUpperCase();
       loadQRCodes();
+      // Initialize Supabase for direct storage uploads
+      initSupabase();
     }
 
     // QR Codes
@@ -1850,31 +1868,45 @@
         return;
       }
 
-      // Real mode: Upload to Supabase Storage via API
+      // Real mode: Upload directly to Supabase Storage
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          },
-          body: formData
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error || 'Upload failed');
+        if (!supabaseClient) {
+          await initSupabase();
         }
 
+        if (!supabaseClient) {
+          throw new Error('Supabase client not initialized');
+        }
+
+        // Generate safe filename
+        const extension = file.name.split('.').pop().toLowerCase();
+        const safeName = `qr_${Date.now()}.${extension}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabaseClient.storage
+          .from('qr-images')
+          .upload(safeName, file, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        // Get public URL
+        const { data: urlData } = supabaseClient.storage
+          .from('qr-images')
+          .getPublicUrl(safeName);
+
+        const imageUrl = urlData.publicUrl;
+
         // Update form fields with Supabase Storage URLs
-        uploadedImageData = result.data.image_url; // Store the URL instead of base64
-        document.getElementById('qrFilename').value = result.data.filename;
-        document.getElementById('qrImageUrl').value = result.data.image_url;
-        document.getElementById('qrDisplayUrl').value = result.data.image_url;
-        document.getElementById('qrDisplayUrlPreview').textContent = result.data.image_url;
+        uploadedImageData = imageUrl;
+        document.getElementById('qrFilename').value = safeName;
+        document.getElementById('qrImageUrl').value = imageUrl;
+        document.getElementById('qrDisplayUrl').value = imageUrl;
+        document.getElementById('qrDisplayUrlPreview').textContent = imageUrl;
         document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text)';
 
         toast('画像をアップロードしました', 'success');
