@@ -1,12 +1,26 @@
-// GET /api/icons - Minimal test
+// GET /api/icons - Fetch icon types list
+import { createSupabaseClient, jsonResponse, errorResponse } from './_supabase.js';
+
 export async function onRequestGet(context) {
-  return new Response(JSON.stringify({ success: true, data: [] }), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+  try {
+    const supabase = createSupabaseClient(context.env);
+
+    const { data, error } = await supabase
+      .from('icon_types')
+      .select('id, code, name, svg_data, background_color, sort_order')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return errorResponse('Failed to fetch icons', 500);
     }
-  });
+
+    return jsonResponse({ success: true, data });
+  } catch (err) {
+    console.error('Error:', err);
+    return errorResponse('Internal server error', 500);
+  }
 }
 
 export async function onRequestOptions() {
@@ -15,7 +29,8 @@ export async function onRequestOptions() {
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400'
     }
   });
 }
