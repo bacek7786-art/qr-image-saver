@@ -1494,11 +1494,12 @@
         }
 
         // Transform API data to format expected by render()
+        // display_type determines what is shown: 'name' shows item.name, 'url' shows item.display_url
         DATA = data.map(item => ({
           url: item.image_url,
           displayUrl: item.display_url,
           name: item.filename,
-          displayName: item.name,
+          displayName: item.display_type === 'url' ? item.display_url : item.name,
           icon: item.icon_type
         }));
 

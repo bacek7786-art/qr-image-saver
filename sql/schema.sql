@@ -14,9 +14,13 @@ CREATE TABLE IF NOT EXISTS qr_codes (
     icon_type VARCHAR(20) NOT NULL,      -- 'BTC', 'ETH', 'XRP', 'USDT'
     sort_order INTEGER DEFAULT 0,        -- Display order
     is_active BOOLEAN DEFAULT true,      -- Active flag
+    display_type VARCHAR(20) DEFAULT 'name',  -- 'name' or 'url' - what to show on frontend
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: Add display_type column if not exists
+ALTER TABLE qr_codes ADD COLUMN IF NOT EXISTS display_type VARCHAR(20) DEFAULT 'name';
 
 -- Create index for faster queries
 CREATE INDEX IF NOT EXISTS idx_qr_codes_active ON qr_codes(is_active, sort_order);
@@ -38,11 +42,11 @@ CREATE TRIGGER update_qr_codes_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Insert initial data (matching current hardcoded data)
-INSERT INTO qr_codes (name, filename, image_url, display_url, icon_type, sort_order) VALUES
-    ('BTC', 'BTC.jpg', './BTC.jpg', 'https://walletcoin.edgeone.app/BTC.jpg', 'USDT', 1),
-    ('Bitcoincash BCH', 'Bitcoincash_BCH.jpg', './Bitcoincash_BCH.jpg', 'https://walletcoin.edgeone.app/Bitcoincash_BCH.jpg', 'BTC', 2),
-    ('Ethereum ETH', 'Ethereum_ETH.jpg', './Ethereum_ETH.jpg', 'https://walletcoin.edgeone.app/Ethereum_ETH.jpg', 'ETH', 3),
-    ('Ripple XRP', 'Ripple_XRP.jpg', './Ripple_XRP.jpg', 'https://walletcoin.edgeone.app/Ripple_XRP.jpg', 'XRP', 4)
+INSERT INTO qr_codes (name, filename, image_url, display_url, icon_type, sort_order, display_type) VALUES
+    ('BTC', 'BTC.jpg', './BTC.jpg', 'https://walletcoin.edgeone.app/BTC.jpg', 'USDT', 1, 'name'),
+    ('Bitcoincash BCH', 'Bitcoincash_BCH.jpg', './Bitcoincash_BCH.jpg', 'https://walletcoin.edgeone.app/Bitcoincash_BCH.jpg', 'BTC', 2, 'name'),
+    ('Ethereum ETH', 'Ethereum_ETH.jpg', './Ethereum_ETH.jpg', 'https://walletcoin.edgeone.app/Ethereum_ETH.jpg', 'ETH', 3, 'name'),
+    ('Ripple XRP', 'Ripple_XRP.jpg', './Ripple_XRP.jpg', 'https://walletcoin.edgeone.app/Ripple_XRP.jpg', 'XRP', 4, 'name')
 ON CONFLICT DO NOTHING;
 
 -- Row Level Security (RLS)

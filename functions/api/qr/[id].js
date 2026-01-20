@@ -27,7 +27,7 @@ export async function onRequestPut(context) {
     const updates = {};
 
     // Only update provided fields
-    const allowedFields = ['name', 'filename', 'image_url', 'display_url', 'icon_type', 'sort_order', 'is_active'];
+    const allowedFields = ['name', 'filename', 'image_url', 'display_url', 'icon_type', 'sort_order', 'is_active', 'display_type'];
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         updates[field] = body[field];
@@ -39,6 +39,14 @@ export async function onRequestPut(context) {
       const validIcons = ['BTC', 'ETH', 'XRP', 'USDT'];
       if (!validIcons.includes(updates.icon_type)) {
         return errorResponse(`Invalid icon_type. Must be one of: ${validIcons.join(', ')}`);
+      }
+    }
+
+    // Validate display_type if provided
+    if (updates.display_type) {
+      const validDisplayTypes = ['name', 'url'];
+      if (!validDisplayTypes.includes(updates.display_type)) {
+        return errorResponse(`Invalid display_type. Must be one of: ${validDisplayTypes.join(', ')}`);
       }
     }
 
