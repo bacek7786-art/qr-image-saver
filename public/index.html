@@ -952,36 +952,13 @@
   </div>
 
   <script>
-    // Crypto Icons SVG - loaded from API
-    let ICONS = {};
-
-    // Fallback icons (used if API fails)
-    const FALLBACK_ICONS = {
+    // Crypto Icons SVG
+    const ICONS = {
       USDT: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.9 17.9v-.003c-.1.007-.6.04-1.8.04-1 0-1.5-.03-1.7-.04v.004c-3.4-.15-5.9-.75-5.9-1.47 0-.72 2.5-1.32 5.9-1.47v2.34c.2.015.75.05 1.73.05 1.17 0 1.57-.04 1.77-.05v-2.34c3.4.15 5.9.75 5.9 1.47 0 .72-2.5 1.32-5.9 1.47zm0-3.18v-2.1h5v-3.2H9.1v3.2h5v2.1c-3.85.18-6.75.95-6.75 1.87 0 .92 2.9 1.7 6.75 1.87v6.7h3.6v-6.7c3.85-.17 6.75-.95 6.75-1.87 0-.92-2.9-1.7-6.75-1.87z"/></svg>',
       BTC: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#fff" d="M22.5 14.1c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.7-.4-.7 2.6c-.4-.1-.9-.2-1.4-.3l.7-2.7-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.01l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c.05.01.1.03.17.06l-.17-.04-1.1 4.5c-.1.2-.3.5-.8.4 0 0-1.2-.3-1.2-.3l-.8 2 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.7.4.7-2.7c.5.1.9.2 1.4.3l-.7 2.7 1.7.4.7-2.8c2.9.5 5.1.3 6-2.3.7-2.1 0-3.3-1.6-4.1 1.1-.3 2-1.1 2.2-2.7zm-4 5.5c-.5 2.1-4.1 1-5.3.7l.9-3.8c1.2.3 4.9.9 4.4 3.1zm.5-5.6c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z"/></svg>',
       ETH: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path fill="#fff" fill-opacity=".6" d="M16 4v8.87l7.5 3.35L16 4z"/><path fill="#fff" d="M16 4l-7.5 12.22L16 12.87V4z"/><path fill="#fff" fill-opacity=".6" d="M16 21.97v6.03l7.5-10.4L16 21.97z"/><path fill="#fff" d="M16 28v-6.03l-7.5-4.37L16 28z"/><path fill="#fff" fill-opacity=".2" d="M16 20.57l7.5-4.35L16 12.87v7.7z"/><path fill="#fff" fill-opacity=".6" d="M8.5 16.22l7.5 4.35v-7.7l-7.5 4.35z"/></svg>',
       XRP: '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#23292F"/><path fill="#fff" d="M23.1 8h2.5l-5.8 5.6c-2.1 2-5.5 2-7.6 0L6.4 8h2.5l4.5 4.3c1.3 1.3 3.5 1.3 4.8 0L23.1 8zM8.9 24H6.4l5.8-5.6c2.1-2 5.5-2 7.6 0l5.8 5.6h-2.5l-4.5-4.3c-1.3-1.3-3.5-1.3-4.8 0L8.9 24z"/></svg>'
     };
-
-    // Load icons from API
-    async function loadIcons() {
-      try {
-        const res = await fetch('/api/icons');
-        const result = await res.json();
-        if (result.success && result.data) {
-          ICONS = result.data.reduce((map, icon) => {
-            map[icon.code] = icon.svg_data;
-            return map;
-          }, {});
-          return true;
-        }
-      } catch (err) {
-        console.warn('Failed to load icons from API, using fallback:', err);
-      }
-      // Use fallback icons
-      ICONS = { ...FALLBACK_ICONS };
-      return false;
-    }
 
     // Data loaded from API
     let DATA = [];
@@ -1467,13 +1444,10 @@
       selectedItems.clear();
       updateButtonState();
 
-      // Get first icon as fallback
-      const defaultIcon = ICONS[Object.keys(ICONS)[0]] || FALLBACK_ICONS.BTC;
-
       list.innerHTML = DATA.map((d, i) => `
         <div class="item">
           <input type="checkbox" class="item-checkbox" data-i="${i}">
-          <div class="crypto-icon">${ICONS[d.icon] || defaultIcon}</div>
+          <div class="crypto-icon">${ICONS[d.icon] || ICONS.BTC}</div>
           <div class="url-wrap">
             <a class="url" href="${d.displayUrl}" target="_blank" rel="noopener" title="${d.displayUrl}">${d.displayName}</a>
           </div>
@@ -1562,12 +1536,9 @@
       btn.classList.remove('busy');
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       // Initialize ImageSaver
       imageSaver = new ImageSaver();
-
-      // Load icons from API first
-      await loadIcons();
 
       // Load QR codes from API
       loadQRCodes();

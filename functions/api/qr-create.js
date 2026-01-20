@@ -25,18 +25,8 @@ export async function onRequestPost(context) {
       return errorResponse('Missing required fields: name, filename, image_url, display_url, icon_type');
     }
 
-    // Validate icon_type from database
-    const { data: iconTypes, error: iconError } = await supabase
-      .from('icon_types')
-      .select('code')
-      .eq('is_active', true);
-
-    if (iconError) {
-      console.error('Failed to fetch icon types:', iconError);
-      return errorResponse('Failed to validate icon type', 500);
-    }
-
-    const validIcons = iconTypes.map(i => i.code);
+    // Validate icon_type
+    const validIcons = ['BTC', 'ETH', 'XRP', 'USDT'];
     if (!validIcons.includes(icon_type)) {
       return errorResponse(`Invalid icon_type. Must be one of: ${validIcons.join(', ')}`);
     }
