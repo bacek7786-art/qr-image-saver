@@ -2087,10 +2087,10 @@
           // Real API call
           if (editingIconId) {
             data.id = editingIconId;
-            await api('PUT', '/api/icons', data);
+            await api('PUT', '/api/icons-update', data);
             toast('Icon updated successfully');
           } else {
-            await api('POST', '/api/icons', data);
+            await api('POST', '/api/icons-create', data);
             toast('Icon added successfully');
           }
           await loadIcons();
