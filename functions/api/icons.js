@@ -1,12 +1,13 @@
-// GET /api/icons - アイコン一覧取得
+// GET /api/icons - Fetch icon types list
 import { createSupabaseClient, jsonResponse, errorResponse } from './_supabase.js';
 
 export async function onRequestGet(context) {
   try {
     const supabase = createSupabaseClient(context.env);
+
     const { data, error } = await supabase
       .from('icon_types')
-      .select('*')
+      .select('id, code, name, svg_data, background_color, sort_order')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
@@ -14,6 +15,7 @@ export async function onRequestGet(context) {
       console.error('Supabase error:', error);
       return errorResponse('Failed to fetch icons', 500);
     }
+
     return jsonResponse({ success: true, data });
   } catch (err) {
     console.error('Error:', err);
