@@ -1,9 +1,12 @@
-// GET /api/icons - Fetch active icon types list
-import { createSupabaseClient, jsonResponse, errorResponse } from './_supabase.js';
+// GET /api/icons - Fetch active icon types list (standalone version)
+import { createClient } from '@supabase/supabase-js';
 
 export async function onRequestGet(context) {
   try {
-    const supabase = createSupabaseClient(context.env);
+    const supabase = createClient(
+      context.env.SUPABASE_URL,
+      context.env.SUPABASE_ANON_KEY
+    );
 
     const { data, error } = await supabase
       .from('icon_types')
@@ -13,25 +16,41 @@ export async function onRequestGet(context) {
 
     if (error) {
       console.error('Supabase error:', error);
-      return errorResponse('Failed to fetch icon types', 500);
+      return new Response(JSON.stringify({ success: false, error: 'Failed to fetch icon types' }), {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
     }
 
-    return jsonResponse({ success: true, data });
+    return new Response(JSON.stringify({ success: true, data }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   } catch (err) {
     console.error('Error:', err);
-    return errorResponse('Internal server error', 500);
+    return new Response(JSON.stringify({ success: false, error: 'Internal server error' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   }
 }
 
-// Handle OPTIONS for CORS preflight
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400'
+      'Access-Control-Allow-Headers': 'Content-Type'
     }
   });
 }
