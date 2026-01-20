@@ -1,4 +1,4 @@
-// GET /api/icons - Get all active icon types (public endpoint)
+// GET /api/icons - Fetch active icon types list
 import { createSupabaseClient, jsonResponse, errorResponse } from './_supabase.js';
 
 export async function onRequestGet(context) {
@@ -23,6 +23,7 @@ export async function onRequestGet(context) {
   }
 }
 
+// Handle OPTIONS for CORS preflight
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
