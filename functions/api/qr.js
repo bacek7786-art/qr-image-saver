@@ -7,7 +7,7 @@ export async function onRequestGet(context) {
 
     const { data, error } = await supabase
       .from('qr_codes')
-      .select('id, name, filename, image_url, display_url, icon_type, sort_order, display_type')
+      .select('id, name, filename, image_url, display_url, icon_type, sort_order')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 

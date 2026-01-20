@@ -18,7 +18,7 @@ export async function onRequestPost(context) {
 
     // Parse request body
     const body = await context.request.json();
-    const { name, filename, image_url, display_url, icon_type, sort_order = 0, display_type = 'name' } = body;
+    const { name, filename, image_url, display_url, icon_type, sort_order = 0 } = body;
 
     // Validate required fields
     if (!name || !filename || !image_url || !display_url || !icon_type) {
@@ -31,12 +31,6 @@ export async function onRequestPost(context) {
       return errorResponse(`Invalid icon_type. Must be one of: ${validIcons.join(', ')}`);
     }
 
-    // Validate display_type
-    const validDisplayTypes = ['name', 'url'];
-    if (!validDisplayTypes.includes(display_type)) {
-      return errorResponse(`Invalid display_type. Must be one of: ${validDisplayTypes.join(', ')}`);
-    }
-
     // Insert new QR code
     const { data, error } = await supabase
       .from('qr_codes')
@@ -47,8 +41,7 @@ export async function onRequestPost(context) {
         display_url,
         icon_type,
         sort_order: parseInt(sort_order, 10) || 0,
-        is_active: true,
-        display_type
+        is_active: true
       })
       .select()
       .single();

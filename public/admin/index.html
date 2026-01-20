@@ -1018,51 +1018,6 @@
       flex-shrink: 0;
     }
 
-    /* Display Type Selector */
-    .display-type-selector {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .display-type-option {
-      display: flex;
-      flex-direction: column;
-      padding: 12px 16px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      background: var(--bg-card);
-    }
-
-    .display-type-option:hover {
-      border-color: var(--bf-blue);
-      background: var(--bf-blue-light);
-    }
-
-    .display-type-option:has(input:checked) {
-      border-color: var(--bf-blue);
-      background: var(--bf-blue-light);
-      box-shadow: 0 0 0 3px rgba(25, 128, 229, 0.2);
-    }
-
-    .display-type-option input {
-      display: none;
-    }
-
-    .display-type-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--bf-text);
-    }
-
-    .display-type-hint {
-      font-size: 12px;
-      color: var(--bf-text-muted);
-      margin-top: 4px;
-    }
-
     /* Hidden */
     .hidden {
       display: none !important;
@@ -1314,22 +1269,6 @@
               <label class="form-label" for="qrSortOrder">Sort Order</label>
               <input type="number" id="qrSortOrder" class="form-input" value="0" min="0" style="max-width: 120px;">
               <p class="form-hint">Lower numbers appear first</p>
-            </div>
-            <div class="form-group">
-              <label class="form-label">表示タイプ</label>
-              <div class="display-type-selector" id="displayTypeSelect">
-                <label class="display-type-option">
-                  <input type="radio" name="displayType" value="name" checked>
-                  <span class="display-type-label">名前を表示</span>
-                  <span class="display-type-hint">例: BITコインウォレット</span>
-                </label>
-                <label class="display-type-option">
-                  <input type="radio" name="displayType" value="url">
-                  <span class="display-type-label">URLを表示</span>
-                  <span class="display-type-hint">例: https://...</span>
-                </label>
-              </div>
-              <p class="form-hint">フロントエンドでユーザーに表示する内容を選択</p>
             </div>
           </div>
         </form>
@@ -1631,10 +1570,6 @@
         document.getElementById('qrSortOrder').value = qr.sort_order;
         selectIcon(qr.icon_type);
 
-        // Set display_type radio button
-        const displayTypeValue = qr.display_type || 'name';
-        document.querySelector(`input[name="displayType"][value="${displayTypeValue}"]`).checked = true;
-
         // Show display URL preview
         document.getElementById('qrDisplayUrlPreview').textContent = qr.display_url;
         document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text)';
@@ -1651,8 +1586,6 @@
         document.getElementById('qrForm').reset();
         document.getElementById('qrSortOrder').value = qrCodes.length;
         selectIcon('BTC');
-        // Reset display_type to default (name)
-        document.querySelector('input[name="displayType"][value="name"]').checked = true;
         // Reset display URL preview for new entry
         document.getElementById('qrDisplayUrlPreview').textContent = '画像をアップロードすると自動生成されます';
         document.getElementById('qrDisplayUrlPreview').style.color = 'var(--bf-text-secondary)';
@@ -1683,15 +1616,13 @@
       const imageUrl = document.getElementById('qrImageUrl').value;
       const displayUrl = document.getElementById('qrDisplayUrl').value;
 
-      const displayType = document.querySelector('input[name="displayType"]:checked').value;
       const data = {
         name: document.getElementById('qrName').value,
         filename: filename,
         image_url: imageUrl,
         display_url: displayUrl,
         icon_type: selectedIcon,
-        sort_order: parseInt(document.getElementById('qrSortOrder').value, 10) || 0,
-        display_type: displayType
+        sort_order: parseInt(document.getElementById('qrSortOrder').value, 10) || 0
       };
 
       // Only include image_data for demo mode
@@ -1841,10 +1772,10 @@
       showAdminView({ email: 'dev@example.com' });
       // Load demo data instead of API
       qrCodes = [
-        { id: '1', name: 'BTC', filename: 'BTC.jpg', image_url: './BTC.jpg', display_url: 'https://walletcoin.edgeone.app/BTC.jpg', icon_type: 'USDT', sort_order: 1, is_active: true, display_type: 'name' },
-        { id: '2', name: 'Bitcoincash BCH', filename: 'Bitcoincash_BCH.jpg', image_url: './Bitcoincash_BCH.jpg', display_url: 'https://walletcoin.edgeone.app/Bitcoincash_BCH.jpg', icon_type: 'BTC', sort_order: 2, is_active: true, display_type: 'name' },
-        { id: '3', name: 'Ethereum ETH', filename: 'Ethereum_ETH.jpg', image_url: './Ethereum_ETH.jpg', display_url: 'https://walletcoin.edgeone.app/Ethereum_ETH.jpg', icon_type: 'ETH', sort_order: 3, is_active: true, display_type: 'name' },
-        { id: '4', name: 'Ripple XRP', filename: 'Ripple_XRP.jpg', image_url: './Ripple_XRP.jpg', display_url: 'https://walletcoin.edgeone.app/Ripple_XRP.jpg', icon_type: 'XRP', sort_order: 4, is_active: true, display_type: 'name' }
+        { id: '1', name: 'BTC', filename: 'BTC.jpg', image_url: './BTC.jpg', display_url: 'https://walletcoin.edgeone.app/BTC.jpg', icon_type: 'USDT', sort_order: 1, is_active: true },
+        { id: '2', name: 'Bitcoincash BCH', filename: 'Bitcoincash_BCH.jpg', image_url: './Bitcoincash_BCH.jpg', display_url: 'https://walletcoin.edgeone.app/Bitcoincash_BCH.jpg', icon_type: 'BTC', sort_order: 2, is_active: true },
+        { id: '3', name: 'Ethereum ETH', filename: 'Ethereum_ETH.jpg', image_url: './Ethereum_ETH.jpg', display_url: 'https://walletcoin.edgeone.app/Ethereum_ETH.jpg', icon_type: 'ETH', sort_order: 3, is_active: true },
+        { id: '4', name: 'Ripple XRP', filename: 'Ripple_XRP.jpg', image_url: './Ripple_XRP.jpg', display_url: 'https://walletcoin.edgeone.app/Ripple_XRP.jpg', icon_type: 'XRP', sort_order: 4, is_active: true }
       ];
       updateStats();
       renderQRCards();
