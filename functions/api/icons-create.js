@@ -1,4 +1,4 @@
-// POST /api/qr-create - Create new QR code (requires authentication)
+// POST /api/icons-create - Create new icon type (requires authentication)
 import { createSupabaseClient, getAccessToken, jsonResponse, errorResponse } from './_supabase.js';
 
 export async function onRequestPost(context) {
@@ -18,54 +18,43 @@ export async function onRequestPost(context) {
 
     // Parse request body
     const body = await context.request.json();
-    const { name, filename, image_url, display_url, icon_type, sort_order = 0, display_type = 'name' } = body;
+    const { code, name, svg_data, background_color, sort_order = 0 } = body;
 
     // Validate required fields
-    if (!name || !filename || !image_url || !display_url || !icon_type) {
-      return errorResponse('Missing required fields: name, filename, image_url, display_url, icon_type');
+    if (!code || !name || !svg_data) {
+      return errorResponse('Missing required fields: code, name, svg_data');
     }
 
-    // Validate icon_type from database
-    const { data: iconTypes, error: iconError } = await supabase
-      .from('icon_types')
-      .select('code')
-      .eq('is_active', true);
-
-    if (iconError) {
-      console.error('Failed to fetch icon types:', iconError);
-      return errorResponse('Failed to validate icon type', 500);
+    // Validate code format (uppercase alphanumeric)
+    if (!/^[A-Z0-9]{2,20}$/.test(code)) {
+      return errorResponse('Invalid code format. Must be 2-20 uppercase alphanumeric characters.');
     }
 
-    const validIcons = iconTypes.map(i => i.code);
-    if (!validIcons.includes(icon_type)) {
-      return errorResponse(`Invalid icon_type. Must be one of: ${validIcons.join(', ')}`);
+    // Validate background_color format if provided
+    if (background_color && !/^#[0-9A-Fa-f]{6}$/.test(background_color)) {
+      return errorResponse('Invalid background_color format. Must be a hex color code (e.g., #F7931A).');
     }
 
-    // Validate display_type
-    const validDisplayTypes = ['name', 'url'];
-    if (!validDisplayTypes.includes(display_type)) {
-      return errorResponse(`Invalid display_type. Must be one of: ${validDisplayTypes.join(', ')}`);
-    }
-
-    // Insert new QR code
+    // Insert new icon type
     const { data, error } = await supabase
-      .from('qr_codes')
+      .from('icon_types')
       .insert({
+        code: code.toUpperCase(),
         name,
-        filename,
-        image_url,
-        display_url,
-        icon_type,
+        svg_data,
+        background_color: background_color || null,
         sort_order: parseInt(sort_order, 10) || 0,
-        is_active: true,
-        display_type
+        is_active: true
       })
       .select()
       .single();
 
     if (error) {
       console.error('Supabase error:', error);
-      return errorResponse('Failed to create QR code', 500);
+      if (error.code === '23505') { // Unique violation
+        return errorResponse('Icon type with this code already exists', 409);
+      }
+      return errorResponse('Failed to create icon type', 500);
     }
 
     return jsonResponse({ success: true, data }, 201);

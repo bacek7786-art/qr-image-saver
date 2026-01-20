@@ -1,7 +1,7 @@
-// PUT/DELETE /api/qr/[id] - Update or delete QR code (requires authentication)
+// PUT/DELETE /api/icons/[code] - Update or delete icon type (requires authentication)
 import { createSupabaseClient, getAccessToken, jsonResponse, errorResponse } from '../_supabase.js';
 
-// PUT - Update QR code
+// PUT - Update icon type
 export async function onRequestPut(context) {
   try {
     const accessToken = getAccessToken(context.request);
@@ -17,9 +17,9 @@ export async function onRequestPut(context) {
       return errorResponse('Unauthorized', 401);
     }
 
-    const id = context.params.id;
-    if (!id) {
-      return errorResponse('QR code ID is required');
+    const code = context.params.code?.toUpperCase();
+    if (!code) {
+      return errorResponse('Icon code is required');
     }
 
     // Parse request body
@@ -27,57 +27,36 @@ export async function onRequestPut(context) {
     const updates = {};
 
     // Only update provided fields
-    const allowedFields = ['name', 'filename', 'image_url', 'display_url', 'icon_type', 'sort_order', 'is_active', 'display_type'];
+    const allowedFields = ['name', 'svg_data', 'background_color', 'sort_order', 'is_active'];
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         updates[field] = body[field];
       }
     }
 
-    // Validate icon_type if provided
-    if (updates.icon_type) {
-      const { data: iconTypes, error: iconError } = await supabase
-        .from('icon_types')
-        .select('code')
-        .eq('is_active', true);
-
-      if (iconError) {
-        console.error('Failed to fetch icon types:', iconError);
-        return errorResponse('Failed to validate icon type', 500);
-      }
-
-      const validIcons = iconTypes.map(i => i.code);
-      if (!validIcons.includes(updates.icon_type)) {
-        return errorResponse(`Invalid icon_type. Must be one of: ${validIcons.join(', ')}`);
-      }
-    }
-
-    // Validate display_type if provided
-    if (updates.display_type) {
-      const validDisplayTypes = ['name', 'url'];
-      if (!validDisplayTypes.includes(updates.display_type)) {
-        return errorResponse(`Invalid display_type. Must be one of: ${validDisplayTypes.join(', ')}`);
-      }
+    // Validate background_color format if provided
+    if (updates.background_color && !/^#[0-9A-Fa-f]{6}$/.test(updates.background_color)) {
+      return errorResponse('Invalid background_color format. Must be a hex color code (e.g., #F7931A).');
     }
 
     if (Object.keys(updates).length === 0) {
       return errorResponse('No valid fields to update');
     }
 
-    // Update QR code
+    // Update icon type
     const { data, error } = await supabase
-      .from('qr_codes')
+      .from('icon_types')
       .update(updates)
-      .eq('id', id)
+      .eq('code', code)
       .select()
       .single();
 
     if (error) {
       console.error('Supabase error:', error);
       if (error.code === 'PGRST116') {
-        return errorResponse('QR code not found', 404);
+        return errorResponse('Icon type not found', 404);
       }
-      return errorResponse('Failed to update QR code', 500);
+      return errorResponse('Failed to update icon type', 500);
     }
 
     return jsonResponse({ success: true, data });
@@ -87,7 +66,7 @@ export async function onRequestPut(context) {
   }
 }
 
-// DELETE - Delete QR code
+// DELETE - Delete icon type
 export async function onRequestDelete(context) {
   try {
     const accessToken = getAccessToken(context.request);
@@ -103,23 +82,39 @@ export async function onRequestDelete(context) {
       return errorResponse('Unauthorized', 401);
     }
 
-    const id = context.params.id;
-    if (!id) {
-      return errorResponse('QR code ID is required');
+    const code = context.params.code?.toUpperCase();
+    if (!code) {
+      return errorResponse('Icon code is required');
     }
 
-    // Delete QR code
-    const { error } = await supabase
+    // Check if icon is being used by any QR codes
+    const { data: usedQRCodes, error: checkError } = await supabase
       .from('qr_codes')
+      .select('id')
+      .eq('icon_type', code)
+      .limit(1);
+
+    if (checkError) {
+      console.error('Supabase check error:', checkError);
+      return errorResponse('Failed to check icon usage', 500);
+    }
+
+    if (usedQRCodes && usedQRCodes.length > 0) {
+      return errorResponse('Cannot delete icon type that is being used by QR codes. Please update or delete those QR codes first.', 409);
+    }
+
+    // Delete icon type
+    const { error } = await supabase
+      .from('icon_types')
       .delete()
-      .eq('id', id);
+      .eq('code', code);
 
     if (error) {
       console.error('Supabase error:', error);
-      return errorResponse('Failed to delete QR code', 500);
+      return errorResponse('Failed to delete icon type', 500);
     }
 
-    return jsonResponse({ success: true, message: 'QR code deleted' });
+    return jsonResponse({ success: true, message: 'Icon type deleted' });
   } catch (err) {
     console.error('Error:', err);
     return errorResponse('Internal server error', 500);
