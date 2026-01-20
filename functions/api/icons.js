@@ -1,6 +1,6 @@
-import { createSupabaseClient, createSupabaseAdminClient, getAccessToken, jsonResponse, errorResponse } from './_supabase.js';
-
 // GET /api/icons - アイコン一覧取得
+import { createSupabaseClient, getAccessToken, jsonResponse, errorResponse } from './_supabase.js';
+
 export async function onRequestGet(context) {
   try {
     const supabase = createSupabaseClient(context.env);
@@ -11,10 +11,12 @@ export async function onRequestGet(context) {
       .order('sort_order', { ascending: true });
 
     if (error) {
+      console.error('Supabase error:', error);
       return errorResponse('Failed to fetch icons', 500);
     }
     return jsonResponse({ success: true, data });
   } catch (err) {
+    console.error('Error:', err);
     return errorResponse('Internal server error', 500);
   }
 }
@@ -22,13 +24,13 @@ export async function onRequestGet(context) {
 // POST /api/icons - アイコン作成
 export async function onRequestPost(context) {
   try {
-    const token = getAccessToken(context.request);
-    if (!token) {
+    const accessToken = getAccessToken(context.request);
+    if (!accessToken) {
       return errorResponse('Unauthorized', 401);
     }
-    const supabase = createSupabaseAdminClient(context.env);
-    const body = await context.request.json();
+    const supabase = createSupabaseClient(context.env, accessToken);
 
+    const body = await context.request.json();
     const { data, error } = await supabase
       .from('icon_types')
       .insert([body])
@@ -36,10 +38,12 @@ export async function onRequestPost(context) {
       .single();
 
     if (error) {
+      console.error('Supabase error:', error);
       return errorResponse(error.message, 400);
     }
     return jsonResponse({ success: true, data }, 201);
   } catch (err) {
+    console.error('Error:', err);
     return errorResponse('Internal server error', 500);
   }
 }
@@ -47,11 +51,12 @@ export async function onRequestPost(context) {
 // PUT /api/icons - アイコン更新
 export async function onRequestPut(context) {
   try {
-    const token = getAccessToken(context.request);
-    if (!token) {
+    const accessToken = getAccessToken(context.request);
+    if (!accessToken) {
       return errorResponse('Unauthorized', 401);
     }
-    const supabase = createSupabaseAdminClient(context.env);
+    const supabase = createSupabaseClient(context.env, accessToken);
+
     const body = await context.request.json();
     const { id, ...updateData } = body;
 
@@ -67,21 +72,23 @@ export async function onRequestPut(context) {
       .single();
 
     if (error) {
+      console.error('Supabase error:', error);
       return errorResponse(error.message, 400);
     }
     return jsonResponse({ success: true, data });
   } catch (err) {
+    console.error('Error:', err);
     return errorResponse('Internal server error', 500);
   }
 }
 
-// OPTIONS for CORS
+// Handle OPTIONS for CORS preflight
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Max-Age': '86400'
     }
